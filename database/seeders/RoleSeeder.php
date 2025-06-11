@@ -16,7 +16,7 @@ class RoleSeeder extends Seeder
     {
         $admin = User::first();
         Role::create([
-            'role_name'         => 'Super Admin',
+            'role_name'         => 'Admin',
             'role_description'  => 'Role ini bertindak sebagai Super Admin',
             'created_by'        => $admin->user_id,
             'updated_by'        => $admin->user_id,

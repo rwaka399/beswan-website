@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Invoice extends Model
 {
-    protected $primaryKey = 'invoice_id'; // Sesuaikan primary key
+    protected $primaryKey = 'invoice_id';
 
     protected $fillable = [
         'external_id',

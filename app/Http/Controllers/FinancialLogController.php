@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class FinancialLogController extends Controller
 {
@@ -49,7 +50,7 @@ class FinancialLogController extends Controller
         }
 
         $logs = $query->orderBy('transaction_date', 'desc')
-                     ->paginate(20);
+            ->paginate(20);
 
         // Data untuk filter dropdown
         $users = User::select('user_id', 'name')->get();
@@ -61,11 +62,11 @@ class FinancialLogController extends Controller
         $netProfit = $totalIncome - $totalExpense;
 
         return view('financial.index', compact(
-            'logs', 
-            'users', 
-            'paymentMethods', 
-            'totalIncome', 
-            'totalExpense', 
+            'logs',
+            'users',
+            'paymentMethods',
+            'totalIncome',
+            'totalExpense',
             'netProfit'
         ));
     }
@@ -86,41 +87,48 @@ class FinancialLogController extends Controller
      */
     public function store(Request $request)
     {
+        // Validasi input - dengan null safety untuk role
+        $user = Auth::user();
+        $userAdmin = ($user && $user->role && $user->role->role_name === 'Admin') ? Auth::id() : null;
+
+        $request->merge([
+            'user_id' => Auth::id(), // Set user_id to authenticated user
+            'created_by' => $userAdmin,
+            'updated_by' => Auth::id(),
+        ]);
+
         $request->validate([
-            'user_id' => 'required|exists:users,user_id',
             'amount' => 'required|numeric|min:0',
             'financial_type' => 'required|in:income,expense',
             'payment_method' => 'nullable|string|max:255',
-            'description' => 'required|string|max:1000',
+            'description' => 'nullable|string|max:1000',
             'transaction_date' => 'required|date',
             'invoice_id' => 'nullable|exists:invoices,invoice_id',
         ], [
-            'user_id.required' => 'User harus dipilih.',
-            'user_id.exists' => 'User yang dipilih tidak valid.',
             'amount.required' => 'Jumlah wajib diisi.',
             'amount.numeric' => 'Jumlah harus berupa angka.',
             'amount.min' => 'Jumlah tidak boleh negatif.',
             'financial_type.required' => 'Jenis transaksi harus dipilih.',
             'financial_type.in' => 'Jenis transaksi harus income atau expense.',
-            'description.required' => 'Deskripsi wajib diisi.',
             'transaction_date.required' => 'Tanggal transaksi wajib diisi.',
             'transaction_date.date' => 'Format tanggal tidak valid.',
         ]);
 
         try {
             $financialLog = FinancialLog::create([
-                'invoice_id' => $request->invoice_id,
+                'invoice_id' => $request->invoice_id ?: null,
                 'user_id' => $request->user_id,
                 'amount' => $request->amount,
                 'financial_type' => $request->financial_type,
-                'payment_method' => $request->payment_method,
-                'description' => $request->description,
+                'payment_method' => $request->payment_method ?: null,
+                'description' => $request->description ?: '-',
                 'transaction_date' => $request->transaction_date,
+                'created_by' => $request->created_by ?: null,
+                'updated_by' => $request->updated_by ?: null,
             ]);
 
             return redirect()->route('financial-index')
                 ->with('success', 'Log keuangan berhasil ditambahkan.');
-
         } catch (\Exception $e) {
             return back()->withInput()
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -133,7 +141,7 @@ class FinancialLogController extends Controller
     public function show($id)
     {
         $financialLog = FinancialLog::with(['user', 'invoice.lessonPackage'])
-                          ->findOrFail($id);
+            ->findOrFail($id);
 
         return view('financial.show', compact('financialLog'));
     }
@@ -158,36 +166,42 @@ class FinancialLogController extends Controller
         $financialLog = FinancialLog::findOrFail($id);
 
         $request->validate([
-            'user_id' => 'required|exists:users,user_id',
             'amount' => 'required|numeric|min:0',
             'financial_type' => 'required|in:income,expense',
             'payment_method' => 'nullable|string|max:255',
-            'description' => 'required|string|max:1000',
+            'description' => 'nullable|string|max:1000',
             'transaction_date' => 'required|date',
             'invoice_id' => 'nullable|exists:invoices,invoice_id',
         ], [
-            'user_id.required' => 'User harus dipilih.',
             'amount.required' => 'Jumlah wajib diisi.',
             'amount.numeric' => 'Jumlah harus berupa angka.',
-           
             'description.required' => 'Deskripsi wajib diisi.',
             'transaction_date.required' => 'Tanggal transaksi wajib diisi.',
         ]);
 
+        // Null safety untuk role check
+        $user = Auth::user();
+        $userAdmin = ($user && $user->role && $user->role->role_name === 'Admin') ? Auth::id() : $financialLog->created_by;
+
+        $request->merge([
+            'created_by' => $userAdmin,
+            'updated_by' => Auth::id(),
+        ]);
+
         try {
             $financialLog->update([
-                'invoice_id' => $request->invoice_id,
-                'user_id' => $request->user_id,
+                'invoice_id' => $request->invoice_id ?: null,
                 'amount' => $request->amount,
                 'financial_type' => $request->financial_type,
-                'payment_method' => $request->payment_method,
-                'description' => $request->description,
+                'payment_method' => $request->payment_method ?: null,
+                'description' => $request->description ?: '-',
                 'transaction_date' => $request->transaction_date,
+                'created_by' => $request->created_by ?: null,
+                'updated_by' => $request->updated_by ?: null,
             ]);
 
             return redirect()->route('financial-index')
                 ->with('success', 'Log keuangan berhasil diperbarui.');
-
         } catch (\Exception $e) {
             return back()->withInput()
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -205,7 +219,6 @@ class FinancialLogController extends Controller
 
             return redirect()->route('financial-index')
                 ->with('success', 'Log keuangan berhasil dihapus.');
-
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
@@ -221,12 +234,12 @@ class FinancialLogController extends Controller
 
         // Data untuk grafik pendapatan vs pengeluaran per bulan
         $monthlyData = FinancialLog::select(
-                DB::raw('EXTRACT(YEAR FROM transaction_date) as year'),
-                DB::raw('EXTRACT(MONTH FROM transaction_date) as month'),
-                DB::raw('SUM(CASE WHEN financial_type = \'income\' THEN amount ELSE 0 END) as income'),
-                DB::raw('SUM(CASE WHEN financial_type = \'expense\' THEN amount ELSE 0 END) as expense'),
-                DB::raw('COUNT(*) as transactions')
-            )
+            DB::raw('EXTRACT(YEAR FROM transaction_date) as year'),
+            DB::raw('EXTRACT(MONTH FROM transaction_date) as month'),
+            DB::raw('SUM(CASE WHEN financial_type = \'income\' THEN amount ELSE 0 END) as income'),
+            DB::raw('SUM(CASE WHEN financial_type = \'expense\' THEN amount ELSE 0 END) as expense'),
+            DB::raw('COUNT(*) as transactions')
+        )
             ->whereBetween('transaction_date', [$startDate, $endDate])
             ->groupBy('year', 'month')
             ->orderBy('year', 'asc')
@@ -234,9 +247,18 @@ class FinancialLogController extends Controller
             ->get()
             ->map(function ($item) {
                 $monthNames = [
-                    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                    1 => 'Januari',
+                    2 => 'Februari',
+                    3 => 'Maret',
+                    4 => 'April',
+                    5 => 'Mei',
+                    6 => 'Juni',
+                    7 => 'Juli',
+                    8 => 'Agustus',
+                    9 => 'September',
+                    10 => 'Oktober',
+                    11 => 'November',
+                    12 => 'Desember'
                 ];
                 $item->month_name = $monthNames[$item->month] . ' ' . $item->year;
                 return $item;
@@ -278,7 +300,7 @@ class FinancialLogController extends Controller
 
         return view('financial.report', compact(
             'monthlyData',
-            'topPackages', 
+            'topPackages',
             'paymentMethodStats',
             'totalIncome',
             'totalExpense',
@@ -316,18 +338,18 @@ class FinancialLogController extends Controller
     private function exportToCsv($logs, $startDate, $endDate)
     {
         $filename = "laporan_keuangan_{$startDate}_to_{$endDate}.csv";
-        
+
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ];
 
-        $callback = function() use ($logs) {
+        $callback = function () use ($logs) {
             $file = fopen('php://output', 'w');
-            
+
             // BOM untuk Excel UTF-8
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
             // Header CSV
             fputcsv($file, [
                 'Tanggal',
@@ -364,9 +386,10 @@ class FinancialLogController extends Controller
     public function dashboard(Request $request)
     {
         $userId = Auth::id();
-        
+
         $query = FinancialLog::where('financial_logs.user_id', $userId);
-        
+
+        // Handle period filters
         switch ($request->get('period')) {
             case 'today':
                 $query->whereDate('transaction_date', Carbon::today());
@@ -374,40 +397,73 @@ class FinancialLogController extends Controller
             case 'week':
                 $query->whereBetween('transaction_date', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
                 break;
-            case 'month':
-                $query->whereBetween('transaction_date', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()]);
-                break;
             case 'year':
                 $query->whereBetween('transaction_date', [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()]);
                 break;
         }
-        
+
+        // Handle specific month filter
+        if ($request->filled('month')) {
+            $month = $request->get('month');
+            $year = Carbon::now()->year; // Use current year
+            $query->whereYear('transaction_date', $year)
+                  ->whereMonth('transaction_date', $month);
+        }
+
         // Recent transactions for the user
         $recentTransactions = $query->with(['invoice.lessonPackage'])
             ->orderBy('transaction_date', 'desc')
             ->paginate(10);
 
-        // My total income
-        $myTotalIncome = FinancialLog::where('user_id', $userId)
-            ->where('financial_type', 'income')
-            ->sum('amount');
+        // My total income (apply same filters)
+        $incomeQuery = FinancialLog::where('user_id', $userId)
+            ->where('financial_type', 'income');
+        
+        $expenseQuery = FinancialLog::where('user_id', $userId)
+            ->where('financial_type', 'expense');
 
-        // My total expense
-        $myTotalExpense = FinancialLog::where('user_id', $userId)
-            ->where('financial_type', 'expense')
-            ->sum('amount');
+        $transactionQuery = FinancialLog::where('user_id', $userId);
 
-        // My total transactions count
-        $myTotalTransactions = FinancialLog::where('user_id', $userId)->count();
+        // Apply the same date filters to summary statistics
+        switch ($request->get('period')) {
+            case 'today':
+                $incomeQuery->whereDate('transaction_date', Carbon::today());
+                $expenseQuery->whereDate('transaction_date', Carbon::today());
+                $transactionQuery->whereDate('transaction_date', Carbon::today());
+                break;
+            case 'week':
+                $incomeQuery->whereBetween('transaction_date', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+                $expenseQuery->whereBetween('transaction_date', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+                $transactionQuery->whereBetween('transaction_date', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+                break;
+            case 'year':
+                $incomeQuery->whereBetween('transaction_date', [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()]);
+                $expenseQuery->whereBetween('transaction_date', [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()]);
+                $transactionQuery->whereBetween('transaction_date', [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()]);
+                break;
+        }
+
+        // Apply month filter to summary statistics
+        if ($request->filled('month')) {
+            $month = $request->get('month');
+            $year = Carbon::now()->year;
+            $incomeQuery->whereYear('transaction_date', $year)->whereMonth('transaction_date', $month);
+            $expenseQuery->whereYear('transaction_date', $year)->whereMonth('transaction_date', $month);
+            $transactionQuery->whereYear('transaction_date', $year)->whereMonth('transaction_date', $month);
+        }
+
+        $myTotalIncome = $incomeQuery->sum('amount');
+        $myTotalExpense = $expenseQuery->sum('amount');
+        $myTotalTransactions = $transactionQuery->count();
 
         // Monthly data for user (last 6 months)
         $myMonthlyData = FinancialLog::select(
-                DB::raw('EXTRACT(YEAR FROM transaction_date) as year'),
-                DB::raw('EXTRACT(MONTH FROM transaction_date) as month'),
-                DB::raw('SUM(CASE WHEN financial_type = \'income\' THEN amount ELSE 0 END) as income'),
-                DB::raw('SUM(CASE WHEN financial_type = \'expense\' THEN amount ELSE 0 END) as expense'),
-                DB::raw('COUNT(*) as transactions')
-            )
+            DB::raw('EXTRACT(YEAR FROM transaction_date) as year'),
+            DB::raw('EXTRACT(MONTH FROM transaction_date) as month'),
+            DB::raw('SUM(CASE WHEN financial_type = \'income\' THEN amount ELSE 0 END) as income'),
+            DB::raw('SUM(CASE WHEN financial_type = \'expense\' THEN amount ELSE 0 END) as expense'),
+            DB::raw('COUNT(*) as transactions')
+        )
             ->where('user_id', $userId)
             ->where('transaction_date', '>=', Carbon::now()->subMonths(6))
             ->groupBy('year', 'month')
@@ -416,9 +472,18 @@ class FinancialLogController extends Controller
             ->get()
             ->map(function ($item) {
                 $monthNames = [
-                    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                    1 => 'Januari',
+                    2 => 'Februari',
+                    3 => 'Maret',
+                    4 => 'April',
+                    5 => 'Mei',
+                    6 => 'Juni',
+                    7 => 'Juli',
+                    8 => 'Agustus',
+                    9 => 'September',
+                    10 => 'Oktober',
+                    11 => 'November',
+                    12 => 'Desember'
                 ];
                 $item->month_name = $monthNames[$item->month] . ' ' . $item->year;
                 return $item;
@@ -427,7 +492,7 @@ class FinancialLogController extends Controller
         return view('financial.dashboard', compact(
             'recentTransactions',
             'myTotalIncome',
-            'myTotalExpense', 
+            'myTotalExpense',
             'myTotalTransactions',
             'myMonthlyData'
         ));

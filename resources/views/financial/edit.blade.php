@@ -26,8 +26,7 @@
             <form action="{{ route('financial-update', $financialLog->financial_log_id) }}" method="POST">
                 @csrf
                 @method('PUT')
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Transaction Date -->
                     <div>
                         <label for="transaction_date" class="block text-sm font-medium text-gray-700 mb-2">
@@ -39,7 +38,9 @@
                         @error('transaction_date')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                    </div>                    <!-- Financial Type -->
+                    </div>
+
+                    <!-- Financial Type -->
                     <div>
                         <label for="financial_type" class="block text-sm font-medium text-gray-700 mb-2">
                             Jenis Transaksi <span class="text-red-500">*</span>
@@ -70,7 +71,9 @@
                         @error('amount')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                    </div>                    <!-- Payment Method -->
+                    </div>
+
+                    <!-- Payment Method -->
                     <div>
                         <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-2">
                             Metode Pembayaran
@@ -88,27 +91,8 @@
                         @enderror
                     </div>
 
-                    <!-- User -->
-                    <div>
-                        <label for="user_id" class="block text-sm font-medium text-gray-700 mb-2">
-                            User <span class="text-red-500">*</span>
-                        </label>
-                        <select name="user_id" id="user_id"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('user_id') border-red-500 @enderror">
-                            <option value="">Pilih User</option>
-                            @foreach($users as $user)
-                                <option value="{{ $user->user_id }}" {{ old('user_id', $financialLog->user_id) == $user->user_id ? 'selected' : '' }}>
-                                    {{ $user->name }} ({{ $user->email }})
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('user_id')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
                     <!-- Invoice ID (Optional) -->
-                    <div>
+                    <div class="md:col-span-2">
                         <label for="invoice_id" class="block text-sm font-medium text-gray-700 mb-2">
                             Invoice ID (Opsional)
                         </label>
@@ -123,7 +107,7 @@
                 </div>                <!-- Description -->
                 <div class="mt-6">
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
-                        Deskripsi <span class="text-red-500">*</span>
+                        Deskripsi
                     </label>
                     <textarea name="description" id="description" rows="4"
                         placeholder="Masukkan deskripsi transaksi..."

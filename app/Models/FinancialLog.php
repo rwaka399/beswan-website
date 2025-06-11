@@ -16,6 +16,9 @@ class FinancialLog extends Model
         'payment_method',
         'description',
         'transaction_date',
+
+        'created_by',
+        'updated_by',
     ];
 
     protected $casts = [

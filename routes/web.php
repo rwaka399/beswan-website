@@ -91,10 +91,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [FinancialLogController::class, 'dashboard'])->name('financial-dashboard');
     });
 
-    Route::get('/transaction/checkout/{lessonPackageId}', [TransactionController::class, 'showCheckout'])->name('transaction.checkout');
-    Route::post('/transaction/create-invoice', [TransactionController::class, 'createInvoice'])->name('transaction.create-invoice');
-    Route::get('/transaction/success', [TransactionController::class, 'success'])->name('transaction.success');
-    Route::get('/transaction/failed', [TransactionController::class, 'failed'])->name('transaction.failed');
+    Route::prefix('/transaction')->group(function () {
+        Route::get('/checkout/{lessonPackageId}', [TransactionController::class, 'showCheckout'])->name('transaction.checkout');
+        Route::post('/create-invoice', [TransactionController::class, 'createInvoice'])->name('transaction.create-invoice');
+        Route::get('/success', [TransactionController::class, 'success'])->name('transaction.success');
+        Route::get('/failed', [TransactionController::class, 'failed'])->name('transaction.failed');
+    });
 });
 
 

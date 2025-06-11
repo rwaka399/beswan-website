@@ -77,12 +77,10 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Quick Filters -->
+        </div>        <!-- Quick Filters -->
         <div class="bg-white shadow-sm rounded-lg p-6 mb-6">
             <h2 class="text-lg font-semibold text-gray-800 mb-4">Filter Cepat</h2>
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-2 items-center">
                 <a href="{{ route('financial-dashboard', ['period' => 'today']) }}" 
                     class="px-4 py-2 {{ request('period') == 'today' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }} rounded-lg hover:bg-blue-500 hover:text-white">
                     Hari Ini
@@ -91,16 +89,36 @@
                     class="px-4 py-2 {{ request('period') == 'week' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }} rounded-lg hover:bg-blue-500 hover:text-white">
                     Minggu Ini
                 </a>
-                <a href="{{ route('financial-dashboard', ['period' => 'month']) }}" 
-                    class="px-4 py-2 {{ request('period') == 'month' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }} rounded-lg hover:bg-blue-500 hover:text-white">
-                    Bulan Ini
-                </a>
+                  <!-- Month Selector -->
+                <div class="month-selector">
+                    <form method="GET" action="{{ route('financial-dashboard') }}" class="inline-block">
+                        <select name="month" onchange="this.form.submit()" 
+                            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent {{ request('month') ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-200 text-gray-700' }} transition-colors duration-200">
+                            <option value="">Pilih Bulan</option>
+                            @php
+                                $months = [
+                                    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                                ];
+                                $currentYear = date('Y');
+                            @endphp
+                            @foreach($months as $monthNum => $monthName)
+                                <option value="{{ $monthNum }}" 
+                                    {{ request('month') == $monthNum ? 'selected' : '' }}>
+                                    {{ $monthName }} {{ $currentYear }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </form>
+                </div>
+                
                 <a href="{{ route('financial-dashboard', ['period' => 'year']) }}" 
                     class="px-4 py-2 {{ request('period') == 'year' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }} rounded-lg hover:bg-blue-500 hover:text-white">
                     Tahun Ini
                 </a>
                 <a href="{{ route('financial-dashboard') }}" 
-                    class="px-4 py-2 {{ !request('period') ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }} rounded-lg hover:bg-blue-500 hover:text-white">
+                    class="px-4 py-2 {{ !request('period') && !request('month') ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }} rounded-lg hover:bg-blue-500 hover:text-white">
                     Semua
                 </a>
             </div>
@@ -228,6 +246,55 @@
                         }
                     }
                 }
+            }
+        });    </script>
+    
+    <style>
+        /* Custom styling for month selector to match filter buttons */
+        .month-selector select {
+            background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>');
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 16px;
+            padding-right: 32px;
+            appearance: none;
+        }
+        
+        .month-selector select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        }
+        
+        .month-selector select option {
+            background-color: white;
+            color: #374151;
+        }
+    </style>
+    
+    <script>
+        // Clear month selection when period buttons are clicked
+        document.addEventListener('DOMContentLoaded', function() {
+            const periodLinks = document.querySelectorAll('a[href*="period="]');
+            const monthSelect = document.querySelector('select[name="month"]');
+            
+            periodLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (monthSelect) {
+                        monthSelect.value = '';
+                    }
+                });
+            });
+            
+            // Clear period parameter when month is selected
+            if (monthSelect) {
+                monthSelect.addEventListener('change', function() {
+                    if (this.value) {
+                        // Remove period from URL if month is selected
+                        const url = new URL(window.location);
+                        url.searchParams.delete('period');
+                        window.history.replaceState({}, '', url);
+                    }
+                });
             }
         });
     </script>

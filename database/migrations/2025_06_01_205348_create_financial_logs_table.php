@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('financial_log_id');
             $table->unsignedBigInteger('invoice_id')->nullable()->unique();
             $table->unsignedBigInteger('user_id');
-            
+
             $table->decimal('amount', 15, 2);
             $table->string('financial_type');
             $table->string('payment_method')->nullable();
@@ -23,6 +23,9 @@ return new class extends Migration
             $table->timestamp('transaction_date');
 
             $table->timestamps();
+
+            $table->bigInteger('created_by')->unsigned()->nullable();
+            $table->bigInteger('updated_by')->unsigned()->nullable();
 
             $table->foreign('invoice_id')->references('invoice_id')->on('invoices')->onDelete('cascade');
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');

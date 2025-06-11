@@ -10,7 +10,7 @@ use Illuminate\Database\Seeder;
 class LessonPackageSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Run the databa   se seeds.
      */
     public function run(): void
     {
