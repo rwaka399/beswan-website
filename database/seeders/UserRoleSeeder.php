@@ -18,6 +18,7 @@ class UserRoleSeeder extends Seeder
             'Admin' => 'Admin',
             'Guru' => 'Guru',
             'User' => 'User',
+            'Siti Mujaer' => 'User',
         ];
 
         foreach ($users as $userName => $roleName) {

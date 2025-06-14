@@ -35,5 +35,12 @@ class UserSeeder extends Seeder
             'phone_number'  => '08123456789',
             'address'       => 'jl.durian'
         ]);
+        User::create([
+            'name'          => 'Siti Mujaer',
+            'email'         => 'siti@gmail.com',
+            'password'      => Hash::make('siti123'),   
+            'phone_number'  => '08123456789',
+            'address'       => 'jl.durian'
+        ]);
     }
 }
