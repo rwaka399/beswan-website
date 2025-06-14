@@ -67,7 +67,50 @@ class User extends Authenticatable
     }
 
     public function isAdmin()
-{
-    return $this->role && $this->role->role_name === 'Admin';
-}
+    {
+        return $this->role && $this->role->role_name === 'Admin';
+    }
+
+    /**
+     * Check if user has specific permission for a menu
+     */
+    public function hasPermission($menuSlug, $permission)
+    {
+        $userRole = $this->userRole()->with('role')->first();
+        
+        if (!$userRole || !$userRole->role) {
+            return false;
+        }
+        
+        return RolePermission::hasMenuPermission($userRole->role->role_id, $menuSlug, $permission);
+    }
+
+    /**
+     * Check if user can access master data (admin/guru only)
+     */
+    public function canAccessMaster()
+    {
+        $userRole = $this->userRole()->with('role')->first();
+        
+        if (!$userRole || !$userRole->role) {
+            return false;
+        }
+        
+        $roleName = $userRole->role->role_name;
+        return in_array($roleName, ['Admin', 'Guru']);
+    }
+
+    /**
+     * Get user's role name
+     */
+    public function getRoleName()
+    {
+        $userRole = $this->userRole()->with('role')->first();
+        
+        if (!$userRole || !$userRole->role) {
+            return null;
+        }
+        
+        return $userRole->role->role_name;
+    }
 }

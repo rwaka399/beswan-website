@@ -132,7 +132,7 @@
                         <label for="province" class="block text-sm font-semibold text-gray-700">Provinsi</label>
                         <select name="province" id="province"
                             class="mt-2 block w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent py-2 px-3 text-gray-800">
-                            <option value="" disabled selected>P Josephineilih Provinsi</option>
+                            <option value="" disabled selected>Pilih Provinsi</option>
                             @foreach ($provinces as $province)
                                 <option value="{{ $province['nama'] }}"
                                     {{ old('province', auth()->user()->province) == $province['nama'] ? 'selected' : '' }}

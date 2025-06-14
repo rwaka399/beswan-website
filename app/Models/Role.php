@@ -25,10 +25,15 @@ class Role extends Model
         return $this->hasMany(UserRole::class, 'role_id', 'role_id');
     }
 
-    // public function roleMenu():HasMany
-    // {
-    //     return $this->hasMany(RoleMenu::class, 'role_id', 'role_id');
-    // }
+    public function roleMenu():HasMany
+    {
+        return $this->hasMany(RoleMenu::class, 'role_id', 'role_id');
+    }
+
+    public function rolePermissions():HasMany
+    {
+        return $this->hasMany(RolePermission::class, 'role_id', 'role_id');
+    }
 
     public function creator(): BelongsTo
     {
