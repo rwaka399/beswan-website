@@ -6,7 +6,7 @@ use App\Http\Controllers\FinancialLogController;
 use App\Http\Controllers\LessonPackageController;
 use App\Http\Controllers\Master\RoleController;
 use App\Http\Controllers\Master\UserController;
-use App\Http\Controllers\MenuController;
+use App\Http\Controllers\Master\MenuController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ViewController;

@@ -31,12 +31,12 @@ class IconHelper
      * Get route name from menu link
      */
     public static function getRouteFromLink($menuLink)
-    {
-        $routeMap = [
+    {        $routeMap = [
             '/master' => 'dashboard',
             '/master/user' => 'user-index',
             '/master/role' => 'role-index',
             '/master/menu' => 'menu-index',
+            '/master/menu/create' => 'menu-create',
             '/master/kelas' => 'lesson-package-index',
             '/master/financial' => 'financial-index',
             '/master/financial/create' => 'financial-create',

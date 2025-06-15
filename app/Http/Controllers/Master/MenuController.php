@@ -17,69 +17,18 @@ class MenuController extends Controller
         $this->middleware('auth');
     }
 
-    /**
-     * Display a listing of the resource.
-     */
+    
+
     public function index(Request $request)
-{
-    $query = Menu::query()
-        ->with(['creator', 'updater', 'parent', 'children', 'roleMenu', 'rolePermissions']);
-    
-    if ($request->filled('search')) {
-        $search = strtolower($request->search);
-        $query->where(function ($q) use ($search) {
-            $q->whereRaw('LOWER(menu_name) LIKE ?', ["%{$search}%"])
-              ->orWhereRaw('LOWER(menu_type) LIKE ?', ["%{$search}%"])
-              ->orWhereRaw('LOWER(menu_link) LIKE ?', ["%{$search}%"]);
-        });
-    }
-
-    // Handle per_page parameter
-    $perPage = $request->get('per_page', 20);
-    
-    if ($perPage === 'all') {
-        // Get all menus ordered hierarchically
-        $menus = $this->getHierarchicalMenus($query);
-    } else {
-        $menus = $query->orderBy('menu_urutan')->paginate((int) $perPage);
-        if ($request->filled('search')) {
-            $menus->appends(['search' => $request->search]);
-        }
-        if ($request->filled('per_page')) {
-            $menus->appends(['per_page' => $request->per_page]);
-        }
-    }
-    
-    return view('master.menu.index', compact('menus'));
-}
-
-    /**
-     * Get menus in hierarchical order (parent followed by children)
-     */
-    private function getHierarchicalMenus($query)
     {
-        $allMenus = $query->get();
-        $hierarchicalMenus = collect();
-        
-        // Get parent menus first (including main and parent types)
-        $parentMenus = $allMenus->where('menu_parent', null)->sortBy('menu_urutan');
-        
-        foreach ($parentMenus as $parent) {
-            $hierarchicalMenus->push($parent);
-            
-            // Add children of this parent
-            $children = $allMenus->where('menu_parent', $parent->menu_id)->sortBy('menu_urutan');
-            foreach ($children as $child) {
-                $hierarchicalMenus->push($child);
-            }
-        }
-        
-        return $hierarchicalMenus;
+        $query = Menu::with(['creator', 'updater', 'parent', 'children'])
+            ->orderBy('menu_parent')
+            ->orderBy('menu_urutan')
+            ->get();
+
+        return view('master.menu.index', compact('query'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $parentMenus = Menu::whereNull('menu_parent')->orderBy('menu_urutan')->get();
@@ -141,7 +90,7 @@ class MenuController extends Controller
             ->where('menu_id', '!=', $id)
             ->orderBy('menu_urutan')
             ->get();
-        
+
         return view('master.menu.edit', compact('menu', 'parentMenus'));
     }
 
@@ -190,7 +139,7 @@ class MenuController extends Controller
         DB::beginTransaction();
         try {
             $menu = Menu::findOrFail($id);
-            
+
             // Check if menu has children
             $hasChildren = Menu::where('menu_parent', $id)->exists();
             if ($hasChildren) {
@@ -232,5 +181,40 @@ class MenuController extends Controller
             ->get();
 
         return response()->json($subMenus);
+    }
+
+    /**
+     * Get menu statistics for display
+     */
+    private function getMenuStats($menus)
+    {
+        $stats = [
+            'total' => 0,
+            'parents' => 0,
+            'children' => 0
+        ];
+
+        if (is_countable($menus)) {
+            $stats['total'] = count($menus);
+            foreach ($menus as $menu) {
+                if ($menu->menu_parent) {
+                    $stats['children']++;
+                } else {
+                    $stats['parents']++;
+                }
+            }
+        } elseif (method_exists($menus, 'total')) {
+            $stats['total'] = $menus->total();
+            // For paginated data, we need to check each item in current page
+            foreach ($menus as $menu) {
+                if ($menu->menu_parent) {
+                    $stats['children']++;
+                } else {
+                    $stats['parents']++;
+                }
+            }
+        }
+
+        return $stats;
     }
 }

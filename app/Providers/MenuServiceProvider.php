@@ -19,11 +19,10 @@ class MenuServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */    public function boot(): void
-    {
-        // Share master menus with all master layout views
+    {        // Share master menus with all master layout views
         View::composer('master.*', function ($view) {
             $menus = Menu::whereIn('menu_slug', [
-                'dashboard', 'user', 'role', 'menu', 'kelas', 'keuangan', 'setting', 'logout'
+                'dashboard', 'user', 'role', 'menu', 'kelas', 'keuangan', 'setting', 'home', 'logout'
             ])
             ->whereNull('menu_parent')
             ->orderBy('menu_urutan')
