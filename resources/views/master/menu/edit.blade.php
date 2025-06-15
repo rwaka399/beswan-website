@@ -76,13 +76,12 @@
 
                     <!-- Menu Type -->
                     <div>
-                        <label for="menu_type" class="block text-sm font-semibold text-gray-700">Menu Type *</label>
-                        <select name="menu_type" id="menu_type"
+                        <label for="menu_type" class="block text-sm font-semibold text-gray-700">Menu Type *</label>                        <select name="menu_type" id="menu_type"
                             class="mt-2 block w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent py-2 px-3 text-gray-800" required>
                             <option value="">Select menu type</option>
-                            <option value="header" {{ old('menu_type', $menu->menu_type) === 'header' ? 'selected' : '' }}>Header</option>
-                            <option value="menu" {{ old('menu_type', $menu->menu_type) === 'menu' ? 'selected' : '' }}>Menu</option>
-                            <option value="submenu" {{ old('menu_type', $menu->menu_type) === 'submenu' ? 'selected' : '' }}>Submenu</option>
+                            <option value="main" {{ old('menu_type', $menu->menu_type) === 'main' ? 'selected' : '' }}>Main</option>
+                            <option value="parent" {{ old('menu_type', $menu->menu_type) === 'parent' ? 'selected' : '' }}>Parent</option>
+                            <option value="child" {{ old('menu_type', $menu->menu_type) === 'child' ? 'selected' : '' }}>Child</option>
                         </select>
                         @error('menu_type')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -198,9 +197,7 @@
                 </div>
             </form>
         </div>
-    </div>
-
-    <script>
+    </div>    <script>
         // Auto generate slug from menu name (only if editing and slug field is empty)
         document.getElementById('menu_name').addEventListener('input', function() {
             const slugField = document.getElementById('menu_slug');
@@ -215,6 +212,45 @@
                     .trim('-'); // Remove leading/trailing hyphens
                 
                 slugField.value = slug;
+            }
+        });
+
+        // Handle menu type change to enable/disable parent menu field
+        document.getElementById('menu_type').addEventListener('change', function() {
+            const menuType = this.value;
+            const parentMenuField = document.getElementById('menu_parent');
+            const parentMenuLabel = document.querySelector('label[for="menu_parent"]');
+            
+            if (menuType === 'main' || menuType === 'parent') {
+                // Disable parent menu field for main and parent types
+                parentMenuField.disabled = true;
+                parentMenuField.value = '';
+                parentMenuField.classList.add('bg-gray-100', 'cursor-not-allowed');
+                parentMenuLabel.classList.add('text-gray-400');
+                
+                // Add visual indication
+                parentMenuField.setAttribute('title', 'Parent menu is not applicable for ' + menuType + ' menu type');
+            } else if (menuType === 'child') {
+                // Enable parent menu field for child type
+                parentMenuField.disabled = false;
+                parentMenuField.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                parentMenuLabel.classList.remove('text-gray-400');
+                parentMenuField.removeAttribute('title');
+            } else {
+                // Reset to default state when no type is selected
+                parentMenuField.disabled = false;
+                parentMenuField.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                parentMenuLabel.classList.remove('text-gray-400');
+                parentMenuField.removeAttribute('title');
+            }
+        });
+
+        // Initialize the parent menu field state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuType = document.getElementById('menu_type').value;
+            if (menuType) {
+                // Trigger the change event to set initial state
+                document.getElementById('menu_type').dispatchEvent(new Event('change'));
             }
         });
     </script>

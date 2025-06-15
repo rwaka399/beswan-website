@@ -24,7 +24,7 @@ class MenuSeeder extends Seeder
             'menu_link' => '/master',
             'menu_urutan' => 1,
             'menu_parent' => null,
-            'menu_slug' => '_dashboard',
+            'menu_slug' => 'dashboard',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -36,7 +36,7 @@ class MenuSeeder extends Seeder
             'menu_link' => '/master/user',
             'menu_urutan' => 2,
             'menu_parent' => null,
-            'menu_slug' => '_user',
+            'menu_slug' => 'user',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -48,7 +48,7 @@ class MenuSeeder extends Seeder
             'menu_link' => '/master/role',
             'menu_urutan' => 3,
             'menu_parent' => null,
-            'menu_slug' => '_role',
+            'menu_slug' => 'role',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -60,7 +60,7 @@ class MenuSeeder extends Seeder
             'menu_link' => '/master/role',
             'menu_urutan' => 4,
             'menu_parent' => null,
-            'menu_slug' => '_menu',
+            'menu_slug' => 'menu',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -72,7 +72,7 @@ class MenuSeeder extends Seeder
             'menu_link' => '/master/kelas',
             'menu_urutan' => 5,
             'menu_parent' => null,
-            'menu_slug' => '_kelas',
+            'menu_slug' => 'kelas',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -84,7 +84,7 @@ class MenuSeeder extends Seeder
             'menu_link' => null,
             'menu_urutan' => 6,
             'menu_parent' => null,
-            'menu_slug' => '_keuangan',
+            'menu_slug' => 'keuangan',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -96,7 +96,7 @@ class MenuSeeder extends Seeder
             'menu_link' => '/master/financial',
             'menu_urutan' => 1,
             'menu_parent' => $financialLog->menu_id,
-            'menu_slug' => '_keuangan_log',
+            'menu_slug' => 'keuangan-log',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -108,7 +108,7 @@ class MenuSeeder extends Seeder
             'menu_link' => '/master/financial/create',
             'menu_urutan' => 2,
             'menu_parent' => $financialLog->menu_id,
-            'menu_slug' => '_keuangan_tambah',
+            'menu_slug' => 'keuangan-tambah',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -120,7 +120,7 @@ class MenuSeeder extends Seeder
             'menu_link' => '/master/financial/report',
             'menu_urutan' => 3,
             'menu_parent' => $financialLog->menu_id,
-            'menu_slug' => '_laporan_keuangan',
+            'menu_slug' => 'laporan-keuangan',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -132,7 +132,7 @@ class MenuSeeder extends Seeder
             'menu_link' => '/master/financial/dashboard',
             'menu_urutan' => 4,
             'menu_parent' => $financialLog->menu_id,
-            'menu_slug' => '_keuangan_dashboard',
+            'menu_slug' => 'keuangan-dashboard',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -144,7 +144,7 @@ class MenuSeeder extends Seeder
             'menu_link' => '/master/setting',
             'menu_urutan' => 7,
             'menu_parent' => null,
-            'menu_slug' => '_setting',
+            'menu_slug' => 'setting',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -156,7 +156,7 @@ class MenuSeeder extends Seeder
             'menu_link' => null,
             'menu_urutan' => 9,
             'menu_parent' => null,
-            'menu_slug' => '_attendence',
+            'menu_slug' => 'attendence',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -168,7 +168,7 @@ class MenuSeeder extends Seeder
             'menu_link' => '/master/attendece',
             'menu_urutan' => 1,
             'menu_parent' => $attendence->menu_id,
-            'menu_slug' => '_attendence_master',
+            'menu_slug' => 'attendence_master',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -180,7 +180,7 @@ class MenuSeeder extends Seeder
             'menu_link' => '/guru/attendece',
             'menu_urutan' => 2,
             'menu_parent' => $attendence->menu_id,
-            'menu_slug' => '_attendence_guru    ',
+            'menu_slug' => 'attendence_guru    ',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -192,7 +192,7 @@ class MenuSeeder extends Seeder
             'menu_link' => '/home',
             'menu_urutan' => 10,
             'menu_parent' => null,
-            'menu_slug' => '_home',
+            'menu_slug' => 'home',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -204,7 +204,7 @@ class MenuSeeder extends Seeder
             'menu_link' => '/profile',
             'menu_urutan' => 11,
             'menu_parent' => null,
-            'menu_slug' => '_profile',
+            'menu_slug' => 'profile',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -216,7 +216,7 @@ class MenuSeeder extends Seeder
             'menu_link' => '/profile/history',
             'menu_urutan' => 12,
             'menu_parent' => null,
-            'menu_slug' => '_history_transaksi',
+            'menu_slug' => 'history_transaksi',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -228,7 +228,7 @@ class MenuSeeder extends Seeder
             'menu_link' => '/logout',
             'menu_urutan' => 13,
             'menu_parent' => null,
-            'menu_slug' => '_logout',
+            'menu_slug' => 'logout',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
