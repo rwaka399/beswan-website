@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Master;
 
 use App\Models\Menu;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
+use App\Http\Controllers\Controller;
 
 class MenuController extends Controller
 {
@@ -20,20 +21,60 @@ class MenuController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request)
-    {
-        $query = Menu::with('creator');
-        
-        if ($request->filled('search')) {
-            $search = strtolower($request->search);
-            $query->where(function ($q) use ($search) {
-                $q->whereRaw('LOWER(menu_name) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(menu_type) LIKE ?', ["%{$search}%"])
-                    ->orWhereRaw('LOWER(menu_link) LIKE ?', ["%{$search}%"]);
-            });
-        }
+{
+    $query = Menu::query()
+        ->with(['creator', 'updater', 'parent', 'children', 'roleMenu', 'rolePermissions']);
+    
+    if ($request->filled('search')) {
+        $search = strtolower($request->search);
+        $query->where(function ($q) use ($search) {
+            $q->whereRaw('LOWER(menu_name) LIKE ?', ["%{$search}%"])
+              ->orWhereRaw('LOWER(menu_type) LIKE ?', ["%{$search}%"])
+              ->orWhereRaw('LOWER(menu_link) LIKE ?', ["%{$search}%"]);
+        });
+    }
 
-        $menus = $query->orderBy('menu_urutan')->paginate(10)->appends(['search' => $request->search]);
-        return view('master.menu.index', compact('menus'));
+    // Handle per_page parameter
+    $perPage = $request->get('per_page', 20);
+    
+    if ($perPage === 'all') {
+        // Get all menus ordered hierarchically
+        $menus = $this->getHierarchicalMenus($query);
+    } else {
+        $menus = $query->orderBy('menu_urutan')->paginate((int) $perPage);
+        if ($request->filled('search')) {
+            $menus->appends(['search' => $request->search]);
+        }
+        if ($request->filled('per_page')) {
+            $menus->appends(['per_page' => $request->per_page]);
+        }
+    }
+    
+    return view('master.menu.index', compact('menus'));
+}
+
+    /**
+     * Get menus in hierarchical order (parent followed by children)
+     */
+    private function getHierarchicalMenus($query)
+    {
+        $allMenus = $query->get();
+        $hierarchicalMenus = collect();
+        
+        // Get parent menus first (including main and parent types)
+        $parentMenus = $allMenus->where('menu_parent', null)->sortBy('menu_urutan');
+        
+        foreach ($parentMenus as $parent) {
+            $hierarchicalMenus->push($parent);
+            
+            // Add children of this parent
+            $children = $allMenus->where('menu_parent', $parent->menu_id)->sortBy('menu_urutan');
+            foreach ($children as $child) {
+                $hierarchicalMenus->push($child);
+            }
+        }
+        
+        return $hierarchicalMenus;
     }
 
     /**

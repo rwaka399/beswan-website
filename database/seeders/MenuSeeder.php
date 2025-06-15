@@ -53,14 +53,39 @@ class MenuSeeder extends Seeder
             'updated_by' => $user->user_id,
         ]);
 
-        Menu::create([
+        $menuMaster = Menu::create([
             'menu_name' => 'Master Menu',
-            'menu_type' => 'main',
+            'menu_type' => 'parent',
             'menu_icon' => 'fas fa-bars',
-            'menu_link' => '/master/role',
+            'menu_link' => null,
             'menu_urutan' => 4,
             'menu_parent' => null,
             'menu_slug' => 'menu',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+        // Child menus for Master Menu
+        Menu::create([
+            'menu_name' => 'Daftar Menu',
+            'menu_type' => 'child',
+            'menu_icon' => null,
+            'menu_link' => '/master/menu',
+            'menu_urutan' => 1,
+            'menu_parent' => $menuMaster->menu_id,
+            'menu_slug' => 'menu-index',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+        Menu::create([
+            'menu_name' => 'Tambah Menu',
+            'menu_type' => 'child',
+            'menu_icon' => null,
+            'menu_link' => '/master/menu/create',
+            'menu_urutan' => 2,
+            'menu_parent' => $menuMaster->menu_id,
+            'menu_slug' => 'menu-create',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -149,7 +174,7 @@ class MenuSeeder extends Seeder
             'updated_by' => $user->user_id,
         ]);
 
-         $attendence = Menu::create([
+        $attendence = Menu::create([
             'menu_name' => 'Absensi',
             'menu_type' => 'parent',
             'menu_icon' => 'fas fa-check-circle',
@@ -226,7 +251,7 @@ class MenuSeeder extends Seeder
             'menu_type' => 'main',
             'menu_icon' => 'fas fa-sign-out-alt',
             'menu_link' => '/logout',
-            'menu_urutan' => 13,
+            'menu_urutan' => 99,
             'menu_parent' => null,
             'menu_slug' => 'logout',
             'created_by' => $user->user_id,
