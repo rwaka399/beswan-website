@@ -69,26 +69,26 @@ Route::middleware(['auth'])->group(function () {
         });
 
         Route::prefix('/lesson_package')->group(function () {
-        Route::get('/', [LessonPackageController::class, 'index'])->name('lesson-package-index');
-        Route::get('/create', [LessonPackageController::class, 'create'])->name('lesson-package-create');
-        Route::post('/store', [LessonPackageController::class, 'store'])->name('lesson-package-store');
-        Route::get('/edit/{id}', [LessonPackageController::class, 'edit'])->name('lesson-package-edit');
-        Route::put('/update/{id}', [LessonPackageController::class, 'update'])->name('lesson-package-update');
-        Route::delete('/destroy/{id}', [LessonPackageController::class, 'destroy'])->name('lesson-package-destroy');
-    });
+            Route::get('/', [LessonPackageController::class, 'index'])->name('lesson-package-index');
+            Route::get('/create', [LessonPackageController::class, 'create'])->name('lesson-package-create');
+            Route::post('/store', [LessonPackageController::class, 'store'])->name('lesson-package-store');
+            Route::get('/edit/{id}', [LessonPackageController::class, 'edit'])->name('lesson-package-edit');
+            Route::put('/update/{id}', [LessonPackageController::class, 'update'])->name('lesson-package-update');
+            Route::delete('/destroy/{id}', [LessonPackageController::class, 'destroy'])->name('lesson-package-destroy');
+        });
 
-    Route::prefix('/financial')->group(function () {
-        Route::get('/', [FinancialLogController::class, 'index'])->name('financial-index');
-        Route::get('/create', [FinancialLogController::class, 'create'])->name('financial-create');
-        Route::post('/store', [FinancialLogController::class, 'store'])->name('financial-store');
-        Route::get('/show/{id}', [FinancialLogController::class, 'show'])->name('financial-show');
-        Route::get('/edit/{id}', [FinancialLogController::class, 'edit'])->name('financial-edit');
-        Route::put('/update/{id}', [FinancialLogController::class, 'update'])->name('financial-update');
-        Route::delete('/destroy/{id}', [FinancialLogController::class, 'destroy'])->name('financial-destroy');
-        Route::get('/report', [FinancialLogController::class, 'report'])->name('financial-report');
-        Route::get('/export', [FinancialLogController::class, 'export'])->name('financial-export');
-        Route::get('/dashboard', [FinancialLogController::class, 'dashboard'])->name('financial-dashboard');
-    });
+        Route::prefix('/financial')->group(function () {
+            Route::get('/', [FinancialLogController::class, 'index'])->name('financial-index');
+            Route::get('/create', [FinancialLogController::class, 'create'])->name('financial-create');
+            Route::post('/store', [FinancialLogController::class, 'store'])->name('financial-store');
+            Route::get('/show/{id}', [FinancialLogController::class, 'show'])->name('financial-show');
+            Route::get('/edit/{id}', [FinancialLogController::class, 'edit'])->name('financial-edit');
+            Route::put('/update/{id}', [FinancialLogController::class, 'update'])->name('financial-update');
+            Route::delete('/destroy/{id}', [FinancialLogController::class, 'destroy'])->name('financial-destroy');
+            Route::get('/report', [FinancialLogController::class, 'report'])->name('financial-report');
+            Route::get('/export', [FinancialLogController::class, 'export'])->name('financial-export');
+            Route::get('/dashboard', [FinancialLogController::class, 'dashboard'])->name('financial-dashboard');
+        });
     });
 
     Route::prefix('/transaction')->group(function () {
