@@ -29,9 +29,9 @@ class IconHelper
 
     /**
      * Get route name from menu link
-     */
-    public static function getRouteFromLink($menuLink)
-    {        $routeMap = [
+     */    public static function getRouteFromLink($menuLink)
+    {
+        $routeMap = [
             '/master' => 'dashboard',
             '/master/user' => 'user-index',
             '/master/role' => 'role-index',
@@ -43,11 +43,14 @@ class IconHelper
             '/master/financial/report' => 'financial-report',
             '/master/financial/dashboard' => 'financial-dashboard',
             '/master/setting' => 'settings',
+            '/master/attendece' => '#', // Route belum dibuat
+            '/guru/attendece' => '#', // Route belum dibuat
             '/profile' => 'profile-index',
             '/profile/history' => 'history',
             '/home' => 'home',
+            '/logout' => 'logout',
         ];
 
-        return $routeMap[$menuLink] ?? '#';
+        return $routeMap[$menuLink] ?? null;
     }
 }

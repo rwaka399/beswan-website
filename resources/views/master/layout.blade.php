@@ -157,14 +157,23 @@
                                                 </button>
                                                 <div id="{{ $menu->menu_slug }}-accordion-child"
                                                     class="accordion-content w-full overflow-hidden transition-[height] duration-300 hidden"
-                                                    role="region" aria-labelledby="{{ $menu->menu_slug }}-accordion">
-                                                    <ul class="ps-8 pt-1 space-y-1">
+                                                    role="region" aria-labelledby="{{ $menu->menu_slug }}-accordion">                                                    <ul class="ps-8 pt-1 space-y-1">
                                                         @foreach($menu->children->sortBy('menu_urutan') as $child)
                                                             <li>
-                                                                <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                                                    href="{{ route(\App\Helpers\IconHelper::getRouteFromLink($child->menu_link)) }}">
-                                                                    {{ $child->menu_name }}
-                                                                </a>
+                                                                @php
+                                                                    $routeName = \App\Helpers\IconHelper::getRouteFromLink($child->menu_link);
+                                                                @endphp
+                                                                @if($routeName && $routeName !== '#' && \Illuminate\Support\Facades\Route::has($routeName))
+                                                                    <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+                                                                        href="{{ route($routeName) }}">
+                                                                        {{ $child->menu_name }}
+                                                                    </a>
+                                                                @else
+                                                                    <span class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-400 rounded-lg cursor-not-allowed">
+                                                                        {{ $child->menu_name }}
+                                                                        <small class="text-xs">(Coming Soon)</small>
+                                                                    </span>
+                                                                @endif
                                                             </li>
                                                         @endforeach
                                                     </ul>
@@ -184,17 +193,31 @@
                                                             </svg>
                                                             {{ $menu->menu_name }}
                                                         </button>
-                                                    </form>
-                                                @else
-                                                    <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                                        href="{{ route(\App\Helpers\IconHelper::getRouteFromLink($menu->menu_link)) }}">
-                                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
-                                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                            {!! \App\Helpers\IconHelper::getFontAwesomeToSvg($menu->menu_icon) !!}
-                                                        </svg>
-                                                        {{ $menu->menu_name }}
-                                                    </a>
+                                                    </form>                                                @else
+                                                    @php
+                                                        $routeName = \App\Helpers\IconHelper::getRouteFromLink($menu->menu_link);
+                                                    @endphp
+                                                    @if($routeName && $routeName !== '#' && \Illuminate\Support\Facades\Route::has($routeName))
+                                                        <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+                                                            href="{{ route($routeName) }}">
+                                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                {!! \App\Helpers\IconHelper::getFontAwesomeToSvg($menu->menu_icon) !!}
+                                                            </svg>
+                                                            {{ $menu->menu_name }}
+                                                        </a>
+                                                    @else
+                                                        <span class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-400 rounded-lg cursor-not-allowed">
+                                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                {!! \App\Helpers\IconHelper::getFontAwesomeToSvg($menu->menu_icon) !!}
+                                                            </svg>
+                                                            {{ $menu->menu_name }}
+                                                            <small class="text-xs ml-2">(Coming Soon)</small>
+                                                        </span>
+                                                    @endif
                                                 @endif
                                             @endif
                                         </li>
