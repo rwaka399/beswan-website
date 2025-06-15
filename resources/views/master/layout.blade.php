@@ -127,195 +127,80 @@
                     class="h-full overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300">
                     <nav class="p-3 w-full flex flex-col flex-wrap">
                         <ul class="flex flex-col space-y-1">
-                            <li>
-                                <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                    href="{{ route('dashboard') }}">
-                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
-                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                                        <polyline points="9 22 9 12 15 12 15 22" />
-                                    </svg>
-                                    Dashboard
-                                </a>
-                            </li>
-                            <li>
-                                <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                    href="{{ route('user-index') }}">
-                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
-                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                                        <circle cx="9" cy="7" r="4" />
-                                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                                    </svg>
-                                    Users
-                                </a>
-                            </li>
-                            <li>
-                                <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                    href="{{ route('role-index') }}">
-                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
-                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path
-                                            d="M12 2a5 5 0 0 0-5 5v3a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2V7a5 5 0 0 0-5-5z" />
-                                        <path d="M9 15l2 2 4-4" />
-                                    </svg>
-                                    Roles
-                                </a>
-                            </li>
-                            <li class="accordion" id="menu-accordion">
-                                <button type="button"
-                                    class="accordion-toggle w-full text-start flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                    aria-expanded="false" aria-controls="menu-accordion-child">
-                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
-                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect width="3" height="3" x="9" y="9" rx="0.5"/>
-                                        <rect width="3" height="3" x="9" y="15" rx="0.5"/>
-                                        <rect width="3" height="3" x="15" y="9" rx="0.5"/>
-                                        <rect width="3" height="3" x="15" y="15" rx="0.5"/>
-                                        <rect width="3" height="3" x="3" y="9" rx="0.5"/>
-                                        <rect width="3" height="3" x="3" y="15" rx="0.5"/>
-                                    </svg>
-                                    Menu Management
-                                    <svg class="accordion-active:block ms-auto hidden size-4"
-                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="m18 15-6-6-6 6" />
-                                    </svg>
-                                    <svg class="accordion-active:hidden ms-auto block size-4"
-                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="m6 9 6 6 6-6" />
-                                    </svg>
-                                </button>
-                                <div id="menu-accordion-child"
-                                    class="accordion-content w-full overflow-hidden transition-[height] duration-300 hidden"
-                                    role="region" aria-labelledby="menu-accordion">
-                                    <ul class="ps-8 pt-1 space-y-1">
-                                        <li>
-                                            <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                                href="{{ route('menu-index') }}">
-                                                All Menus
-                                            </a>
+                            @if(isset($menus))
+                                @foreach($menus as $menu)
+                                    @if($menu->menu_type === 'main' || $menu->menu_type === 'parent')
+                                        <li @if($menu->children->count() > 0) class="accordion" id="{{ $menu->menu_slug }}-accordion" @endif>
+                                            @if($menu->children->count() > 0)
+                                                <!-- Parent Menu with Children -->
+                                                <button type="button"
+                                                    class="accordion-toggle w-full text-start flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+                                                    aria-expanded="false" aria-controls="{{ $menu->menu_slug }}-accordion-child">
+                                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        {!! \App\Helpers\IconHelper::getFontAwesomeToSvg($menu->menu_icon) !!}
+                                                    </svg>
+                                                    {{ $menu->menu_name }}
+                                                    <svg class="accordion-active:block ms-auto hidden size-4"
+                                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="m18 15-6-6-6 6" />
+                                                    </svg>
+                                                    <svg class="accordion-active:hidden ms-auto block size-4"
+                                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                        stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="m6 9 6 6 6-6" />
+                                                    </svg>
+                                                </button>
+                                                <div id="{{ $menu->menu_slug }}-accordion-child"
+                                                    class="accordion-content w-full overflow-hidden transition-[height] duration-300 hidden"
+                                                    role="region" aria-labelledby="{{ $menu->menu_slug }}-accordion">
+                                                    <ul class="ps-8 pt-1 space-y-1">
+                                                        @foreach($menu->children->sortBy('menu_urutan') as $child)
+                                                            <li>
+                                                                <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+                                                                    href="{{ route(\App\Helpers\IconHelper::getRouteFromLink($child->menu_link)) }}">
+                                                                    {{ $child->menu_name }}
+                                                                </a>
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
+                                                </div>
+                                            @else
+                                                <!-- Single Menu -->
+                                                @if($menu->menu_slug === 'logout')
+                                                    <form method="POST" action="{{ route('logout') }}">
+                                                        @csrf
+                                                        <button type="submit"
+                                                            class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100">
+                                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg"
+                                                                width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                                stroke-linejoin="round">
+                                                                {!! \App\Helpers\IconHelper::getFontAwesomeToSvg($menu->menu_icon) !!}
+                                                            </svg>
+                                                            {{ $menu->menu_name }}
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+                                                        href="{{ route(\App\Helpers\IconHelper::getRouteFromLink($menu->menu_link)) }}">
+                                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                            height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            {!! \App\Helpers\IconHelper::getFontAwesomeToSvg($menu->menu_icon) !!}
+                                                        </svg>
+                                                        {{ $menu->menu_name }}
+                                                    </a>
+                                                @endif
+                                            @endif
                                         </li>
-                                        <li>
-                                            <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                                href="{{ route('menu-create') }}">
-                                                Create Menu
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                                href="{{ route('menu-tree') }}">
-                                                Menu Structure
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </li>
-                            <li>
-                                <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                    href="{{ route('lesson-package-index') }}">
-                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
-                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="3" y1="6" x2="15" y2="6" />
-                                        <line electroencephalographyx1="3" y1="12" x2="15" y2="12" />
-                                        <line x1="3" y1="18" x2="15" y2="18" />
-                                        <path d="M19 6l1.5 1.5L19 9l1.5 1.5L19 12l1.5 1.5L19 15l1.5 1.5L19 18" />
-                                    </svg>
-                                    Lesson Packages
-                                </a>
-                            </li>
-                            <li class="accordion" id="financial-accordion">
-                                <button type="button"
-                                    class="accordion-toggle w-full text-start flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                    aria-expanded="false" aria-controls="financial-accordion-child">
-                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
-                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                                    </svg>
-                                    Keuangan
-                                    <svg class="accordion-active:block ms-auto hidden size-4"
-                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="m18 15-6-6-6 6" />
-                                    </svg>
-                                    <svg class="accordion-active:hidden ms-auto block size-4"
-                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="m6 9 6 6 6-6" />
-                                    </svg>
-                                </button>
-                                <div id="financial-accordion-child"
-                                    class="accordion-content w-full overflow-hidden transition-[height] duration-300 hidden"
-                                    role="region" aria-labelledby="financial-accordion">
-                                    <ul class="ps-8 pt-1 space-y-1">
-                                        <li>
-                                            <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                                href="{{ route('financial-index') }}">
-                                                Log Keuangan
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                                href="{{ route('financial-create') }}">
-                                                Tambah Log
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                                href="{{ route('financial-report') }}">
-                                                Laporan Keuangan
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                                href="{{ route('financial-dashboard') }}">
-                                                Dashboard Keuangan
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </li>
-                            <li>
-                                <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                    href="{{ route('settings') }}">
-                                    <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
-                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-                                        <circle cx="12" cy="12" r="3"/>
-                                    </svg>
-                                    Settings
-                                </a>
-                            </li>
-                            <li>
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit"
-                                        class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100">
-                                        <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg"
-                                            width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                            stroke-linejoin="round">
-                                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                                            <polyline points="16 17 21 12 16 7" />
-                                            <line x1="21" y1="12" x2="9" y2="12" />
-                                        </svg>
-                                        Logout
-                                    </button>
-                                </form>
-                            </li>
+                                    @endif
+                                @endforeach
+                            @endif
                         </ul>
                     </nav>
                 </div>

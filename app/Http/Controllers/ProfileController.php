@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Menu;
+use App\Traits\HasMenus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -9,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
+    use HasMenus;
     public function __construct()
     {
         $this->middleware('auth');
@@ -27,6 +30,7 @@ class ProfileController extends Controller
      */
     public function edit()
     {
+        $menus = $this->getProfileMenus();
         $provinces = json_decode(file_get_contents('https://ibnux.github.io/data-indonesia/provinsi.json'), true);
         return view('profile.edit', compact('provinces'));
     }
