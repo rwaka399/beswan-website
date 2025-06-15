@@ -45,7 +45,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::prefix('/master')->group(function () {
-        Route::get('/dashboard', [ViewController::class, 'dashboard'])->name('dashboard');
+        Route::get('/', [ViewController::class, 'dashboard'])->name('dashboard');
 
         Route::prefix('/user')->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('user-index');
@@ -67,9 +67,8 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/update/{id}', [RoleController::class, 'update'])->name('role-update');
             Route::delete('/destroy/{id}', [RoleController::class, 'destroy'])->name('role-destroy');
         });
-    });
 
-    Route::prefix('/lesson_package')->group(function () {
+        Route::prefix('/lesson_package')->group(function () {
         Route::get('/', [LessonPackageController::class, 'index'])->name('lesson-package-index');
         Route::get('/create', [LessonPackageController::class, 'create'])->name('lesson-package-create');
         Route::post('/store', [LessonPackageController::class, 'store'])->name('lesson-package-store');
@@ -89,6 +88,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/report', [FinancialLogController::class, 'report'])->name('financial-report');
         Route::get('/export', [FinancialLogController::class, 'export'])->name('financial-export');
         Route::get('/dashboard', [FinancialLogController::class, 'dashboard'])->name('financial-dashboard');
+    });
     });
 
     Route::prefix('/transaction')->group(function () {

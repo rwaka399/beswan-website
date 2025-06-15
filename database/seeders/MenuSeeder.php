@@ -15,237 +15,220 @@ class MenuSeeder extends Seeder
     public function run(): void
     {
         $user = User::first();
-        
-        // Master Data Menu
-        $masterData = Menu::create([
-            'menu_name' => 'Master Data',
-            'menu_type' => 'parent',
-            'menu_icon' => 'fas fa-database',
-            'menu_link' => '#',
-            'menu_urutan' => 1,
-            'menu_parent' => null,
-            'menu_slug' => 'master-data',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
-
-        // User Management
-        Menu::create([
-            'menu_name' => 'Users',
-            'menu_type' => 'child',
-            'menu_icon' => 'fas fa-users',
-            'menu_link' => '/admin/users',
-            'menu_urutan' => 1,
-            'menu_parent' => $masterData->menu_id,
-            'menu_slug' => 'users',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
-
-        // Role Management
-        Menu::create([
-            'menu_name' => 'Roles',
-            'menu_type' => 'child',
-            'menu_icon' => 'fas fa-user-tag',
-            'menu_link' => '/admin/roles',
-            'menu_urutan' => 2,
-            'menu_parent' => $masterData->menu_id,
-            'menu_slug' => 'roles',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
-
-        // Menu Management
-        Menu::create([
-            'menu_name' => 'Menus',
-            'menu_type' => 'child',
-            'menu_icon' => 'fas fa-list',
-            'menu_link' => '/admin/menus',
-            'menu_urutan' => 3,
-            'menu_parent' => $masterData->menu_id,
-            'menu_slug' => 'menus',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
-
-        // Lesson Package Management
-        Menu::create([
-            'menu_name' => 'Lesson Packages',
-            'menu_type' => 'child',
-            'menu_icon' => 'fas fa-book',
-            'menu_link' => '/admin/lesson-packages',
-            'menu_urutan' => 4,
-            'menu_parent' => $masterData->menu_id,
-            'menu_slug' => 'lesson-packages',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
-
-        // Course Management Menu
-        $courseManagement = Menu::create([
-            'menu_name' => 'Course Management',
-            'menu_type' => 'parent',
-            'menu_icon' => 'fas fa-graduation-cap',
-            'menu_link' => '#',
-            'menu_urutan' => 2,
-            'menu_parent' => null,
-            'menu_slug' => 'course-management',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
-
-        // Courses
-        Menu::create([
-            'menu_name' => 'Courses',
-            'menu_type' => 'child',
-            'menu_icon' => 'fas fa-chalkboard-teacher',
-            'menu_link' => '/courses',
-            'menu_urutan' => 1,
-            'menu_parent' => $courseManagement->menu_id,
-            'menu_slug' => 'courses',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
-
-        // Lessons
-        Menu::create([
-            'menu_name' => 'Lessons',
-            'menu_type' => 'child',
-            'menu_icon' => 'fas fa-play-circle',
-            'menu_link' => '/lessons',
-            'menu_urutan' => 2,
-            'menu_parent' => $courseManagement->menu_id,
-            'menu_slug' => 'lessons',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
-
-        // Financial Management Menu
-        $financialManagement = Menu::create([
-            'menu_name' => 'Financial Management',
-            'menu_type' => 'parent',
-            'menu_icon' => 'fas fa-dollar-sign',
-            'menu_link' => '#',
-            'menu_urutan' => 3,
-            'menu_parent' => null,
-            'menu_slug' => 'financial-management',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
-
-        // Invoices
-        Menu::create([
-            'menu_name' => 'Invoices',
-            'menu_type' => 'child',
-            'menu_icon' => 'fas fa-file-invoice',
-            'menu_link' => '/invoices',
-            'menu_urutan' => 1,
-            'menu_parent' => $financialManagement->menu_id,
-            'menu_slug' => 'invoices',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
-
-        // Financial Logs
-        Menu::create([
-            'menu_name' => 'Financial Logs',
-            'menu_type' => 'child',
-            'menu_icon' => 'fas fa-receipt',
-            'menu_link' => '/financial-logs',
-            'menu_urutan' => 2,
-            'menu_parent' => $financialManagement->menu_id,
-            'menu_slug' => 'financial-logs',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
-
-        // Reports Menu
-        $reports = Menu::create([
-            'menu_name' => 'Reports',
-            'menu_type' => 'parent',
-            'menu_icon' => 'fas fa-chart-bar',
-            'menu_link' => '#',
-            'menu_urutan' => 4,
-            'menu_parent' => null,
-            'menu_slug' => 'reports',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
-
-        // User Reports
-        Menu::create([
-            'menu_name' => 'User Reports',
-            'menu_type' => 'child',
-            'menu_icon' => 'fas fa-users',
-            'menu_link' => '/reports/users',
-            'menu_urutan' => 1,
-            'menu_parent' => $reports->menu_id,
-            'menu_slug' => 'user-reports',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
-
-        // Financial Reports
-        Menu::create([
-            'menu_name' => 'Financial Reports',
-            'menu_type' => 'child',
-            'menu_icon' => 'fas fa-chart-line',
-            'menu_link' => '/reports/financial',
-            'menu_urutan' => 2,
-            'menu_parent' => $reports->menu_id,
-            'menu_slug' => 'financial-reports',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
-
-        // Settings Menu
-        $settings = Menu::create([
-            'menu_name' => 'Settings',
-            'menu_type' => 'parent',
-            'menu_icon' => 'fas fa-cog',
-            'menu_link' => '#',
-            'menu_urutan' => 5,
-            'menu_parent' => null,
-            'menu_slug' => 'settings',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
-
-        // System Settings
-        Menu::create([
-            'menu_name' => 'System Settings',
-            'menu_type' => 'child',
-            'menu_icon' => 'fas fa-tools',
-            'menu_link' => '/settings/system',
-            'menu_urutan' => 1,
-            'menu_parent' => $settings->menu_id,
-            'menu_slug' => 'system-settings',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
-
-        // Profile Settings
-        Menu::create([
-            'menu_name' => 'Profile Settings',
-            'menu_type' => 'child',
-            'menu_icon' => 'fas fa-user-cog',
-            'menu_link' => '/settings/profile',
-            'menu_urutan' => 2,
-            'menu_parent' => $settings->menu_id,
-            'menu_slug' => 'profile-settings',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
 
         // Dashboard (single menu)
         Menu::create([
             'menu_name' => 'Dashboard',
-            'menu_type' => 'single',
+            'menu_type' => 'main',
             'menu_icon' => 'fas fa-tachometer-alt',
-            'menu_link' => '/dashboard',
-            'menu_urutan' => 0,
+            'menu_link' => '/master',
+            'menu_urutan' => 1,
             'menu_parent' => null,
-            'menu_slug' => 'dashboard',
+            'menu_slug' => '_dashboard',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+        Menu::create([
+            'menu_name' => 'Master User',
+            'menu_type' => 'main',
+            'menu_icon' => 'fas fa-users',
+            'menu_link' => '/master/user',
+            'menu_urutan' => 2,
+            'menu_parent' => null,
+            'menu_slug' => '_user',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+        Menu::create([
+            'menu_name' => 'Master Role',
+            'menu_type' => 'main',
+            'menu_icon' => 'fas fa-user-tag',
+            'menu_link' => '/master/role',
+            'menu_urutan' => 3,
+            'menu_parent' => null,
+            'menu_slug' => '_role',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+        Menu::create([
+            'menu_name' => 'Master Menu',
+            'menu_type' => 'main',
+            'menu_icon' => 'fas fa-bars',
+            'menu_link' => '/master/role',
+            'menu_urutan' => 4,
+            'menu_parent' => null,
+            'menu_slug' => '_menu',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+        Menu::create([
+            'menu_name' => 'Paket Les',
+            'menu_type' => 'main',
+            'menu_icon' => 'fas fa-chalkboard-teacher',
+            'menu_link' => '/master/kelas',
+            'menu_urutan' => 5,
+            'menu_parent' => null,
+            'menu_slug' => '_kelas',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+        $financialLog = Menu::create([
+            'menu_name' => 'Keuangan',
+            'menu_type' => 'parent',
+            'menu_icon' => 'fas fa-money-bill-wave',
+            'menu_link' => null,
+            'menu_urutan' => 6,
+            'menu_parent' => null,
+            'menu_slug' => '_keuangan',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+        Menu::create([
+            'menu_name' => 'Log Keuangan',
+            'menu_type' => 'child',
+            'menu_icon' => null,
+            'menu_link' => '/master/financial',
+            'menu_urutan' => 1,
+            'menu_parent' => $financialLog->menu_id,
+            'menu_slug' => '_keuangan_log',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+        Menu::create([
+            'menu_name' => 'Tambah Log',
+            'menu_type' => 'child',
+            'menu_icon' => null,
+            'menu_link' => '/master/financial/create',
+            'menu_urutan' => 2,
+            'menu_parent' => $financialLog->menu_id,
+            'menu_slug' => '_keuangan_tambah',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+        Menu::create([
+            'menu_name' => 'Laporan Keuangan',
+            'menu_type' => 'child',
+            'menu_icon' => null,
+            'menu_link' => '/master/financial/report',
+            'menu_urutan' => 3,
+            'menu_parent' => $financialLog->menu_id,
+            'menu_slug' => '_laporan_keuangan',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+        Menu::create([
+            'menu_name' => 'Dashboard Keuangan',
+            'menu_type' => 'child',
+            'menu_icon' => null,
+            'menu_link' => '/master/financial/dashboard',
+            'menu_urutan' => 4,
+            'menu_parent' => $financialLog->menu_id,
+            'menu_slug' => '_keuangan_dashboard',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+        Menu::create([
+            'menu_name' => 'Setting',
+            'menu_type' => 'main',
+            'menu_icon' => 'fas fa-cog',
+            'menu_link' => '/master/setting',
+            'menu_urutan' => 7,
+            'menu_parent' => null,
+            'menu_slug' => '_setting',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+         $attendence = Menu::create([
+            'menu_name' => 'Absensi',
+            'menu_type' => 'parent',
+            'menu_icon' => 'fas fa-check-circle',
+            'menu_link' => null,
+            'menu_urutan' => 9,
+            'menu_parent' => null,
+            'menu_slug' => '_attendence',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+        Menu::create([
+            'menu_name' => 'Attendence Master',
+            'menu_type' => 'child',
+            'menu_icon' => null,
+            'menu_link' => '/master/attendece',
+            'menu_urutan' => 1,
+            'menu_parent' => $attendence->menu_id,
+            'menu_slug' => '_attendence_master',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+        Menu::create([
+            'menu_name' => 'Attendence Guru',
+            'menu_type' => 'child',
+            'menu_icon' => null,
+            'menu_link' => '/guru/attendece',
+            'menu_urutan' => 2,
+            'menu_parent' => $attendence->menu_id,
+            'menu_slug' => '_attendence_guru    ',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+        Menu::create([
+            'menu_name' => 'Home',
+            'menu_type' => 'main',
+            'menu_icon' => 'fas fa-home',
+            'menu_link' => '/home',
+            'menu_urutan' => 10,
+            'menu_parent' => null,
+            'menu_slug' => '_home',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+        Menu::create([
+            'menu_name' => 'Profile',
+            'menu_type' => 'main',
+            'menu_icon' => 'fas fa-user',
+            'menu_link' => '/profile',
+            'menu_urutan' => 11,
+            'menu_parent' => null,
+            'menu_slug' => '_profile',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+        Menu::create([
+            'menu_name' => 'History Transaksi',
+            'menu_type' => 'main',
+            'menu_icon' => 'fas fa-history',
+            'menu_link' => '/profile/history',
+            'menu_urutan' => 12,
+            'menu_parent' => null,
+            'menu_slug' => '_history_transaksi',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
+        Menu::create([
+            'menu_name' => 'Logout',
+            'menu_type' => 'main',
+            'menu_icon' => 'fas fa-sign-out-alt',
+            'menu_link' => '/logout',
+            'menu_urutan' => 13,
+            'menu_parent' => null,
+            'menu_slug' => '_logout',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
