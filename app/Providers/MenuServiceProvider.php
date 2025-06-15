@@ -18,13 +18,12 @@ class MenuServiceProvider extends ServiceProvider
 
     /**
      * Bootstrap any application services.
-     */
-    public function boot(): void
+     */    public function boot(): void
     {
         // Share master menus with all master layout views
         View::composer('master.*', function ($view) {
             $menus = Menu::whereIn('menu_slug', [
-                'dashboard', 'user', 'role', 'menu', 'kelas', 'keuangan', 'setting'
+                'dashboard', 'user', 'role', 'menu', 'kelas', 'keuangan', 'setting', 'logout'
             ])
             ->whereNull('menu_parent')
             ->orderBy('menu_urutan')
@@ -37,7 +36,7 @@ class MenuServiceProvider extends ServiceProvider
         // Share profile menus with all profile layout views
         View::composer('profile.*', function ($view) {
             $menus = Menu::whereIn('menu_slug', [
-                'profile', 'history_transaksi', 'home'
+                'profile', 'history_transaksi', 'home', 'logout'
             ])
             ->whereNull('menu_parent')
             ->orderBy('menu_urutan')
