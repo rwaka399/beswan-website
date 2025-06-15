@@ -166,19 +166,58 @@
                                     Roles
                                 </a>
                             </li>
-                            <li>
-                                <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                    href="#">
+                            <li class="accordion" id="menu-accordion">
+                                <button type="button"
+                                    class="accordion-toggle w-full text-start flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+                                    aria-expanded="false" aria-controls="menu-accordion-child">
                                     <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
                                         height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="3" y1="6" x2="15" y2="6" />
-                                        <line electroencephalographyx1="3" y1="12" x2="15" y2="12" />
-                                        <line x1="3" y1="18" x2="15" y2="18" />
-                                        <path d="M19 6l1.5 1.5L19 9l1.5 1.5L19 12l1.5 1.5L19 15l1.5 1.5L19 18" />
+                                        <rect width="3" height="3" x="9" y="9" rx="0.5"/>
+                                        <rect width="3" height="3" x="9" y="15" rx="0.5"/>
+                                        <rect width="3" height="3" x="15" y="9" rx="0.5"/>
+                                        <rect width="3" height="3" x="15" y="15" rx="0.5"/>
+                                        <rect width="3" height="3" x="3" y="9" rx="0.5"/>
+                                        <rect width="3" height="3" x="3" y="15" rx="0.5"/>
                                     </svg>
-                                    Menu Master
-                                </a>
+                                    Menu Management
+                                    <svg class="accordion-active:block ms-auto hidden size-4"
+                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m18 15-6-6-6 6" />
+                                    </svg>
+                                    <svg class="accordion-active:hidden ms-auto block size-4"
+                                        xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m6 9 6 6 6-6" />
+                                    </svg>
+                                </button>
+                                <div id="menu-accordion-child"
+                                    class="accordion-content w-full overflow-hidden transition-[height] duration-300 hidden"
+                                    role="region" aria-labelledby="menu-accordion">
+                                    <ul class="ps-8 pt-1 space-y-1">
+                                        <li>
+                                            <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+                                                href="{{ route('menu-index') }}">
+                                                All Menus
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+                                                href="{{ route('menu-create') }}">
+                                                Create Menu
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+                                                href="{{ route('menu-tree') }}">
+                                                Menu Structure
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </li>
                             <li>
                                 <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"

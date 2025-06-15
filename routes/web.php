@@ -5,6 +5,7 @@ use App\Http\Controllers\FinancialLogController;
 use App\Http\Controllers\LessonPackageController;
 use App\Http\Controllers\Master\RoleController;
 use App\Http\Controllers\Master\UserController;
+use App\Http\Controllers\MenuController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ViewController;
@@ -66,6 +67,18 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/edit/{id}', [RoleController::class, 'edit'])->name('role-edit');
             Route::put('/update/{id}', [RoleController::class, 'update'])->name('role-update');
             Route::delete('/destroy/{id}', [RoleController::class, 'destroy'])->name('role-destroy');
+        });
+
+        Route::prefix('/menu')->group(function () {
+            Route::get('/', [MenuController::class, 'index'])->name('menu-index');
+            Route::get('/create', [MenuController::class, 'create'])->name('menu-create');
+            Route::post('/store', [MenuController::class, 'store'])->name('menu-store');
+            Route::get('/show/{id}', [MenuController::class, 'show'])->name('menu-show');
+            Route::get('/edit/{id}', [MenuController::class, 'edit'])->name('menu-edit');
+            Route::put('/update/{id}', [MenuController::class, 'update'])->name('menu-update');
+            Route::delete('/destroy/{id}', [MenuController::class, 'destroy'])->name('menu-destroy');
+            Route::get('/tree', [MenuController::class, 'getMenuTree'])->name('menu-tree');
+            Route::get('/sub-menus/{parentId}', [MenuController::class, 'getSubMenus'])->name('menu-sub-menus');
         });
 
         Route::prefix('/lesson_package')->group(function () {
