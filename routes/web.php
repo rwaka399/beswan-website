@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\FinancialLogController;
 use App\Http\Controllers\LessonPackageController;
 use App\Http\Controllers\Master\RoleController;
@@ -102,6 +103,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/export', [FinancialLogController::class, 'export'])->name('financial-export');
             Route::get('/dashboard', [FinancialLogController::class, 'dashboard'])->name('financial-dashboard');
         });
+
+        Route::get('/settings', [ConfigController::class, 'index'])->name('settings');
     });
 
     Route::prefix('/transaction')->group(function () {

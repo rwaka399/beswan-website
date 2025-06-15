@@ -98,7 +98,7 @@
                     </div>
                     <span class="text-gray-700 font-medium">Lihat Laporan Keuangan</span>
                 </a>
-                <a href="/users" 
+                <a href="{{ route('user-index') }}" 
                    class="flex items-center p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors duration-200">
                     <div class="p-2 bg-purple-600 rounded-lg mr-3">
                         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
