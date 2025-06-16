@@ -125,9 +125,9 @@ class RolePermissionSeeder extends Seeder
             }
         }
         
-        echo "RolePermissionSeeder completed:\n";
-        echo "- Admin: " . RolePermission::where('role_id', $adminRole->role_id ?? 0)->count() . " permissions\n";
-        echo "- Guru: " . RolePermission::where('role_id', $guruRole->role_id ?? 0)->count() . " permissions\n";
-        echo "- User: " . RolePermission::where('role_id', $userRole->role_id ?? 0)->count() . " permissions (none as intended)\n";
+        // echo "RolePermissionSeeder completed:\n";
+        // echo "- Admin: " . RolePermission::where('role_id', $adminRole->role_id ?? 0)->count() . " permissions\n";
+        // echo "- Guru: " . RolePermission::where('role_id', $guruRole->role_id ?? 0)->count() . " permissions\n";
+        // echo "- User: " . RolePermission::where('role_id', $userRole->role_id ?? 0)->count() . " permissions (none as intended)\n";
     }
 }
