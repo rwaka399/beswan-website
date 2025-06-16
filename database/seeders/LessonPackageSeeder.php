@@ -19,6 +19,7 @@ class LessonPackageSeeder extends Seeder
         LessonPackage::create([
             'lesson_package_name' => 'Lesson Package 1',
             'lesson_duration'     => 1,
+            'duration_unit'       => 'minggu',
             'lesson_package_price' => 100000,
             'lesson_package_description' => 'Paket les selama 1 minggu, cocok untuk pemula yang ingin mencoba dulu.',
             'created_by'         => $admin->user_id,
@@ -28,6 +29,7 @@ class LessonPackageSeeder extends Seeder
         LessonPackage::create([
             'lesson_package_name' => 'Lesson Package 2',
             'lesson_duration'     => 2,
+            'duration_unit'       => 'minggu',
             'lesson_package_price' => 200000,
             'lesson_package_description' => 'Paket les 2 minggu, cocok untuk pelajar yang ingin belajar lebih intensif.',
             'created_by'         => $admin->user_id,
@@ -37,6 +39,7 @@ class LessonPackageSeeder extends Seeder
         LessonPackage::create([
             'lesson_package_name' => 'Lesson Package 3',
             'lesson_duration'     => 3,
+            'duration_unit'       => 'minggu',
             'lesson_package_price' => 300000,
             'lesson_package_description' => 'Paket les 3 minggu, memberikan waktu yang cukup untuk peningkatan signifikan.',
             'created_by'         => $admin->user_id,
@@ -45,7 +48,8 @@ class LessonPackageSeeder extends Seeder
         
         LessonPackage::create([
             'lesson_package_name' => 'Lesson Package 4',
-            'lesson_duration'     => 4,
+            'lesson_duration'     => 1,
+            'duration_unit'       => 'bulan',
             'lesson_package_price' => 400000,
             'lesson_package_description' => 'Paket les selama 1 bulan penuh, ideal untuk hasil belajar maksimal.',
             'created_by'         => $admin->user_id,

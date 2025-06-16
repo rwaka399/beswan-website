@@ -25,9 +25,16 @@ class UserRoleSeeder extends Seeder
             $user = User::where('name', $userName)->first();
             $role = Role::where('role_name', $roleName)->first();
 
-            $user->userRole()->create([
-                'role_id' => $role->role_id,
-            ]);
+            if ($user && $role) {
+                // Check if user role already exists to prevent duplicate
+                $existingUserRole = $user->userRoles()->where('role_id', $role->role_id)->first();
+                
+                if (!$existingUserRole) {
+                    $user->userRoles()->create([
+                        'role_id' => $role->role_id,
+                    ]);
+                }
+            }
         }
     }
 }

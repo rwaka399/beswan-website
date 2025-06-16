@@ -50,7 +50,7 @@
                             </th>
                             <th scope="col"
                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Duration (Week)
+                                Duration
                             </th>
                             <th scope="col"
                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -76,7 +76,7 @@
                                     {{ $lessonPackage->lesson_package_description ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $lessonPackage->lesson_duration ?? '-' }}
+                                    {{ $lessonPackage->formatted_duration ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {{ number_format($lessonPackage->lesson_package_price, 0, ',', '.') ?? '-' }}

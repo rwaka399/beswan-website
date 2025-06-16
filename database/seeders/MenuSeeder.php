@@ -94,10 +94,10 @@ class MenuSeeder extends Seeder
             'menu_name' => 'Paket Les',
             'menu_type' => 'main',
             'menu_icon' => 'fas fa-chalkboard-teacher',
-            'menu_link' => '/master/kelas',
+            'menu_link' => '/master/lesson_package',
             'menu_urutan' => 5,
             'menu_parent' => null,
-            'menu_slug' => 'kelas',
+            'menu_slug' => 'lesson_package',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -163,61 +163,49 @@ class MenuSeeder extends Seeder
         ]);
 
         Menu::create([
-            'menu_name' => 'Setting',
+            'menu_name' => 'Settings',
             'menu_type' => 'main',
             'menu_icon' => 'fas fa-cog',
-            'menu_link' => '/master/setting',
+            'menu_link' => '/master/settings',
             'menu_urutan' => 7,
             'menu_parent' => null,
-            'menu_slug' => 'setting',
+            'menu_slug' => 'settings',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
 
-        $attendence = Menu::create([
-            'menu_name' => 'Absensi',
+        $attendance = Menu::create([
+            'menu_name' => 'Attendance',
             'menu_type' => 'parent',
-            'menu_icon' => 'fas fa-check-circle',
+            'menu_icon' => 'fas fa-clipboard-check',
             'menu_link' => null,
             'menu_urutan' => 9,
             'menu_parent' => null,
-            'menu_slug' => 'attendence',
+            'menu_slug' => 'attendance',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
 
         Menu::create([
-            'menu_name' => 'Attendence Master',
+            'menu_name' => 'Kelola Attendance',
             'menu_type' => 'child',
             'menu_icon' => null,
-            'menu_link' => '/master/attendece',
+            'menu_link' => '/master/attendance',
             'menu_urutan' => 1,
-            'menu_parent' => $attendence->menu_id,
-            'menu_slug' => 'attendence_master',
+            'menu_parent' => $attendance->menu_id,
+            'menu_slug' => 'attendance_master',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
 
         Menu::create([
-            'menu_name' => 'Attendence Guru',
+            'menu_name' => 'Attendance Guru',
             'menu_type' => 'child',
             'menu_icon' => null,
-            'menu_link' => '/guru/attendece',
+            'menu_link' => '/guru/attendance',
             'menu_urutan' => 2,
-            'menu_parent' => $attendence->menu_id,
-            'menu_slug' => 'attendence_guru    ',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
-
-        Menu::create([
-            'menu_name' => 'Home',
-            'menu_type' => 'main',
-            'menu_icon' => 'fas fa-home',
-            'menu_link' => '/home',
-            'menu_urutan' => 10,
-            'menu_parent' => null,
-            'menu_slug' => 'home',
+            'menu_parent' => $attendance->menu_id,
+            'menu_slug' => 'attendance_guru',
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
@@ -245,6 +233,19 @@ class MenuSeeder extends Seeder
             'created_by' => $user->user_id,
             'updated_by' => $user->user_id,
         ]);
+
+        Menu::create([
+            'menu_name' => 'Home',
+            'menu_type' => 'main',
+            'menu_icon' => 'fas fa-home',
+            'menu_link' => '/',
+            'menu_urutan' => 98,
+            'menu_parent' => null,
+            'menu_slug' => 'home',
+            'created_by' => $user->user_id,
+            'updated_by' => $user->user_id,
+        ]);
+
 
         Menu::create([
             'menu_name' => 'Logout',

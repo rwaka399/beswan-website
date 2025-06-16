@@ -104,7 +104,7 @@
                                     {{ $user->address ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ $user->userRole->first()->role->role_name ?? '-' }}
+                                    {{ $user->userRoles->first()->role->role_name ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <a href="{{ route('user-edit', $user->user_id) }}"

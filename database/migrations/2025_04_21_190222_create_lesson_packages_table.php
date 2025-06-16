@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id('lesson_package_id');
             $table->string('lesson_package_name', 100)->nullable();
             $table->string('lesson_package_description', 255)->nullable();
-            $table->integer('lesson_duration')->nullable();
+            $table->integer('lesson_duration')->nullable(); // Angka durasi
+            $table->enum('duration_unit', ['hari', 'minggu', 'bulan'])->default('minggu'); // Unit durasi
             $table->unsignedInteger('lesson_package_price')->nullable();
 
             $table->timestamps();

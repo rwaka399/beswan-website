@@ -61,7 +61,7 @@ class FinancialLogController extends Controller
         $totalExpense = FinancialLog::where('financial_type', 'expense')->sum('amount');
         $netProfit = $totalIncome - $totalExpense;
 
-        return view('financial.index', compact(
+        return view('master.financial.index', compact(
             'logs',
             'users',
             'paymentMethods',
@@ -79,7 +79,7 @@ class FinancialLogController extends Controller
         $users = User::select('user_id', 'name')->get();
         $invoices = Invoice::with('lessonPackage')->select('invoice_id', 'external_id', 'lesson_package_id')->get();
 
-        return view('financial.create', compact('users', 'invoices'));
+        return view('master.financial.create', compact('users', 'invoices'));
     }
 
     /**
@@ -87,16 +87,6 @@ class FinancialLogController extends Controller
      */
     public function store(Request $request)
     {
-        // Validasi input - dengan null safety untuk role
-        $user = Auth::user();
-        $userAdmin = ($user->userRoles() === 'Admin') ? Auth::id() : null;
-
-        $request->merge([
-            'user_id' => Auth::id(), // Set user_id to authenticated user
-            'created_by' => $userAdmin,
-            'updated_by' => Auth::id(),
-        ]);
-
         $request->validate([
             'amount' => 'required|numeric|min:0',
             'financial_type' => 'required|in:income,expense',
@@ -116,15 +106,15 @@ class FinancialLogController extends Controller
 
         try {
             $financialLog = FinancialLog::create([
-                'invoice_id' => $request->invoice_id ?: null,
-                'user_id' => $request->user_id,
+                'invoice_id' => $request->invoice_id,
+                'user_id' => Auth::id(),
                 'amount' => $request->amount,
                 'financial_type' => $request->financial_type,
-                'payment_method' => $request->payment_method ?: null,
+                'payment_method' => $request->payment_method,
                 'description' => $request->description ?: '-',
                 'transaction_date' => $request->transaction_date,
-                'created_by' => $request->created_by ?: null,
-                'updated_by' => $request->updated_by ?: null,
+                'created_by' => Auth::id(),
+                'updated_by' => Auth::id(),
             ]);
 
             return redirect()->route('financial-index')
@@ -155,7 +145,7 @@ class FinancialLogController extends Controller
         $users = User::select('user_id', 'name')->get();
         $invoices = Invoice::with('lessonPackage')->select('invoice_id', 'external_id', 'lesson_package_id')->get();
 
-        return view('financial.edit', compact('financialLog', 'users', 'invoices'));
+        return view('master.financial.edit', compact('financialLog', 'users', 'invoices'));
     }
 
     /**
@@ -175,29 +165,18 @@ class FinancialLogController extends Controller
         ], [
             'amount.required' => 'Jumlah wajib diisi.',
             'amount.numeric' => 'Jumlah harus berupa angka.',
-            'description.required' => 'Deskripsi wajib diisi.',
             'transaction_date.required' => 'Tanggal transaksi wajib diisi.',
-        ]);
-
-        // Null safety untuk role check
-        $user = Auth::user();
-        $userAdmin = ($user && $user->role && $user->role->role_name === 'Admin') ? Auth::id() : $financialLog->created_by;
-
-        $request->merge([
-            'created_by' => $userAdmin,
-            'updated_by' => Auth::id(),
         ]);
 
         try {
             $financialLog->update([
-                'invoice_id' => $request->invoice_id ?: null,
+                'invoice_id' => $request->invoice_id,
                 'amount' => $request->amount,
                 'financial_type' => $request->financial_type,
-                'payment_method' => $request->payment_method ?: null,
+                'payment_method' => $request->payment_method,
                 'description' => $request->description ?: '-',
                 'transaction_date' => $request->transaction_date,
-                'created_by' => $request->created_by ?: null,
-                'updated_by' => $request->updated_by ?: null,
+                'updated_by' => Auth::id(),
             ]);
 
             return redirect()->route('financial-index')
@@ -298,7 +277,7 @@ class FinancialLogController extends Controller
         // Total transaksi
         $totalTransactions = FinancialLog::whereBetween('transaction_date', [$startDate, $endDate])->count();
 
-        return view('financial.report', compact(
+        return view('master.financial.report', compact(
             'monthlyData',
             'topPackages',
             'paymentMethodStats',
@@ -489,7 +468,7 @@ class FinancialLogController extends Controller
                 return $item;
             });
 
-        return view('financial.dashboard', compact(
+        return view('master.financial.dashboard', compact(
             'recentTransactions',
             'myTotalIncome',
             'myTotalExpense',

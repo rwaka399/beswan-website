@@ -1,6 +1,6 @@
 @extends('master.layout')
 
-@section('title', 'Edit Role')
+@section('title', 'Create Role')
 
 @section('content')
     <!-- Breadcrumb -->
@@ -16,13 +16,13 @@
                     </svg>
                 </li>
                 <li class="text-base font-semibold text-gray-800 truncate" aria-current="page">
-                    Edit Role
+                    Create Role
                 </li>
             </ol>
         </div>
     </div>
 
-    <!-- Form Edit Role -->
+    <!-- Form Create Role -->
     <div class="max-w-6xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
         <div class="w-full bg-white rounded-3xl shadow-xl p-8 space-y-6">
             <!-- Header -->
@@ -33,8 +33,8 @@
                     <path d="M12 2a5 5 0 0 0-5 5v3a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2V7a5 5 0 0 0-5-5z" />
                     <path d="M9 15l2 2 4-4" />
                 </svg>
-                <h2 class="mt-3 text-2xl font-bold text-gray-800">Edit Role & Permissions</h2>
-                <p class="text-sm text-gray-500">Update role details and manage menu permissions</p>
+                <h2 class="mt-3 text-2xl font-bold text-gray-800">Create Role & Permissions</h2>
+                <p class="text-sm text-gray-500">Create a new role and configure menu permissions</p>
             </div>
 
             <!-- Flash Message -->
@@ -42,13 +42,6 @@
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative transition-opacity duration-300"
                     role="alert">
                     {{ session('error') }}
-                </div>
-            @endif
-
-            @if (session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative transition-opacity duration-300"
-                    role="alert">
-                    {{ session('success') }}
                 </div>
             @endif
 
@@ -65,16 +58,15 @@
             @endif
 
             <!-- Form -->
-            <form action="{{ route('role-update', $role->role_id) }}" method="POST" class="space-y-6" aria-label="Edit role form">
+            <form action="{{ route('role-store') }}" method="POST" class="space-y-6" aria-label="Create role form">
                 @csrf
-                @method('PUT')
 
                 <!-- Role Basic Info -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Role Name -->
                     <div>
                         <label for="role_name" class="block text-sm font-semibold text-gray-700">Role Name</label>
-                        <input type="text" name="role_name" id="role_name" value="{{ old('role_name', $role->role_name) }}"
+                        <input type="text" name="role_name" id="role_name" value="{{ old('role_name') }}"
                             class="mt-2 block w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent py-2 px-3 text-gray-800"
                             placeholder="Enter role name" required>
                         @error('role_name')
@@ -87,7 +79,7 @@
                         <label for="role_description" class="block text-sm font-semibold text-gray-700">Description</label>
                         <textarea name="role_description" id="role_description" rows="3"
                             class="mt-2 block w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent py-2 px-3 text-gray-800 resize-none"
-                            placeholder="Enter role description">{{ old('role_description', $role->role_description) }}</textarea>
+                            placeholder="Enter role description" required>{{ old('role_description') }}</textarea>
                         @error('role_description')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -110,7 +102,6 @@
                                                 name="menus[]" 
                                                 value="{{ $menu->menu_id }}"
                                                 class="menu-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                                                {{ in_array($menu->menu_id, $roleMenus) ? 'checked' : '' }}
                                                 onchange="togglePermissions({{ $menu->menu_id }})">
                                             <span class="ml-2 text-sm font-medium text-gray-700">
                                                 <i class="{{ $menu->menu_icon ?? 'fas fa-circle' }} mr-2"></i>
@@ -121,19 +112,14 @@
                                 </div>
 
                                 <!-- Parent Menu Permissions -->
-                                <div id="permissions-{{ $menu->menu_id }}" class="mt-3 ml-6 {{ in_array($menu->menu_id, $roleMenus) ? '' : 'hidden' }}">
+                                <div id="permissions-{{ $menu->menu_id }}" class="mt-3 ml-6 hidden">
                                     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
                                         @foreach($availablePermissions as $permKey => $permLabel)
-                                            @php
-                                                $hasPermission = isset($rolePermissions[$menu->menu_id]) && 
-                                                    $rolePermissions[$menu->menu_id]->contains('slug', $permKey);
-                                            @endphp
                                             <label class="flex items-center text-xs">
                                                 <input type="checkbox" 
                                                     name="permissions[{{ $menu->menu_id }}][]" 
                                                     value="{{ $permKey }}"
-                                                    class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                                                    {{ $hasPermission ? 'checked' : '' }}>
+                                                    class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
                                                 <span class="ml-1 text-gray-600">{{ $permLabel }}</span>
                                             </label>
                                         @endforeach
@@ -152,7 +138,6 @@
                                                                 name="menus[]" 
                                                                 value="{{ $child->menu_id }}"
                                                                 class="menu-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                                                                {{ in_array($child->menu_id, $roleMenus) ? 'checked' : '' }}
                                                                 onchange="togglePermissions({{ $child->menu_id }})">
                                                             <span class="ml-2 text-sm text-gray-600">{{ $child->menu_name }}</span>
                                                         </label>
@@ -160,19 +145,14 @@
                                                 </div>
 
                                                 <!-- Child Menu Permissions -->
-                                                <div id="permissions-{{ $child->menu_id }}" class="mt-2 ml-6 {{ in_array($child->menu_id, $roleMenus) ? '' : 'hidden' }}">
+                                                <div id="permissions-{{ $child->menu_id }}" class="mt-2 ml-6 hidden">
                                                     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2">
                                                         @foreach($availablePermissions as $permKey => $permLabel)
-                                                            @php
-                                                                $hasPermission = isset($rolePermissions[$child->menu_id]) && 
-                                                                    $rolePermissions[$child->menu_id]->contains('slug', $permKey);
-                                                            @endphp
                                                             <label class="flex items-center text-xs">
                                                                 <input type="checkbox" 
                                                                     name="permissions[{{ $child->menu_id }}][]" 
                                                                     value="{{ $permKey }}"
-                                                                    class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                                                                    {{ $hasPermission ? 'checked' : '' }}>
+                                                                    class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
                                                                 <span class="ml-1 text-gray-500">{{ $permLabel }}</span>
                                                             </label>
                                                         @endforeach
@@ -195,7 +175,7 @@
                     </a>
                     <button type="submit"
                         class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition duration-200">
-                        Update Role & Permissions
+                        Create Role & Permissions
                     </button>
                 </div>
             </form>

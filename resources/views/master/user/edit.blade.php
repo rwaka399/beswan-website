@@ -179,7 +179,7 @@
                         <option value="" disabled selected>Pilih Role</option>
                         @foreach ($roles as $role)
                             <option value="{{ $role->role_id }}"
-                                {{ old('role_id', $user->userRole->first()->role_id ?? '') == $role->role_id ? 'selected' : '' }}>
+                                {{ old('role_id', $user->userRoles->first()->role_id ?? '') == $role->role_id ? 'selected' : '' }}>
                                 {{ $role->role_name }}
                             </option>
                         @endforeach

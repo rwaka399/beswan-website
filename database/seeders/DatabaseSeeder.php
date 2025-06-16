@@ -24,9 +24,10 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             UserRoleSeeder::class,
             MenuSeeder::class,
-            // RoleMenuSeeder::class,
-            // RolePermissionSeeder::class,
+            RoleMenuSeeder::class,
+            RolePermissionSeeder::class,
             LessonPackageSeeder::class,
+            AttendanceSeeder::class,
         ]);
     }
 }

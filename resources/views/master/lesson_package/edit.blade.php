@@ -85,14 +85,30 @@
                 </div>
 
                 <!-- Lesson Duration -->
-                <div>
-                    <label for="lesson_duration" class="block text-sm font-semibold text-gray-700">Duration (Week)</label>
-                    <input type="number" name="lesson_duration" id="lesson_duration" value="{{ old('lesson_duration', $lessonPackage->lesson_duration) }}"
-                        class="mt-2 block w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent py-2 px-3 text-gray-800"
-                        placeholder="Enter duration in minutes" required min="1">
-                    @error('lesson_duration')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="lesson_duration" class="block text-sm font-semibold text-gray-700">Duration</label>
+                        <input type="number" name="lesson_duration" id="lesson_duration" value="{{ old('lesson_duration', $lessonPackage->lesson_duration) }}"
+                            class="mt-2 block w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent py-2 px-3 text-gray-800"
+                            placeholder="Enter duration number" required min="1">
+                        @error('lesson_duration')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    
+                    <div>
+                        <label for="duration_unit" class="block text-sm font-semibold text-gray-700">Duration Unit</label>
+                        <select name="duration_unit" id="duration_unit" 
+                            class="mt-2 block w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent py-2 px-3 text-gray-800" required>
+                            <option value="">Select duration unit</option>
+                            <option value="hari" {{ old('duration_unit', $lessonPackage->duration_unit) == 'hari' ? 'selected' : '' }}>Hari</option>
+                            <option value="minggu" {{ old('duration_unit', $lessonPackage->duration_unit) == 'minggu' ? 'selected' : '' }}>Minggu</option>
+                            <option value="bulan" {{ old('duration_unit', $lessonPackage->duration_unit) == 'bulan' ? 'selected' : '' }}>Bulan</option>
+                        </select>
+                        @error('duration_unit')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
 
                 <!-- Lesson Package Price -->

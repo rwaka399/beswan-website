@@ -14,33 +14,44 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
-            'name'          => 'Admin',
-            'email'         => 'admin@gmail.com',
-            'password'      => Hash::make('admin123'),
-            'phone_number'  => '08123456789',
-            'address'       => 'jl.rambutan'
-        ]);
-        User::create([
-            'name'          => 'Guru',
-            'email'         => 'guru@gmail.com',
-            'password'      => Hash::make('admin123'),
-            'phone_number'  => '08123456789',
-            'address'       => 'jl.mangga'
-        ]);
-        User::create([
-            'name'          => 'User',
-            'email'         => 'user@gmail.com',
-            'password'      => Hash::make('admin123'),   
-            'phone_number'  => '08123456789',
-            'address'       => 'jl.durian'
-        ]);
-        User::create([
-            'name'          => 'Siti Mujaer',
-            'email'         => 'siti@gmail.com',
-            'password'      => Hash::make('siti1234'),   
-            'phone_number'  => '08123456789',
-            'address'       => 'jl.durian'
-        ]);
+        User::updateOrCreate(
+            ['email' => 'raka.test@gmail.com'],
+            [
+                'name'          => 'Admin',
+                'password'      => Hash::make('rakaraka1'),
+                'phone_number'  => '08123456789',
+                'address'       => 'jl.rambutan'
+            ]
+        );
+        
+        User::updateOrCreate(
+            ['email' => 'guru.test@gmail.com'],
+            [
+                'name'          => 'Guru',
+                'password'      => Hash::make('guruguru123'),
+                'phone_number'  => '08123456789',
+                'address'       => 'jl.mangga'
+            ]
+        );
+        
+        User::updateOrCreate(
+            ['email' => 'user.test@gmail.com'],
+            [
+                'name'          => 'User',
+                'password'      => Hash::make('useruser123'),   
+                'phone_number'  => '08123456789',
+                'address'       => 'jl.durian'
+            ]
+        );
+        
+        User::updateOrCreate(
+            ['email' => 'siti.test@gmail.com'],
+            [
+                'name'          => 'Siti Mujaer',
+                'password'      => Hash::make('siti1234'),   
+                'phone_number'  => '08123456789',
+                'address'       => 'jl.durian'
+            ]
+        );
     }
 }
