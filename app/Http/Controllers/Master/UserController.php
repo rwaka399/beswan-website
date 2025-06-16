@@ -24,7 +24,7 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        $query = User::with('userRole.role');
+        $query = User::with('userRoles.role');
 
         if ($request->filled('search')) {
             $search = strtolower($request->search);
@@ -36,7 +36,7 @@ class UserController extends Controller
                     ->orWhereRaw('LOWER(city) LIKE ?', ["%{$search}%"])
                     ->orWhereRaw('LOWER(kecamatan) LIKE ?', ["%{$search}%"])
                     ->orWhereRaw('LOWER(address) LIKE ?', ["%{$search}%"])
-                    ->orWhereHas('userRole.role', function ($r) use ($search) {
+                    ->orWhereHas('userRoles.role', function ($r) use ($search) {
                         $r->whereRaw('LOWER(role_name) LIKE ?', ["%{$search}%"]);
                     });
             });
@@ -106,8 +106,8 @@ class UserController extends Controller
 
     public function edit($id)
     {
-        // Ambil data user beserta relasi userRole
-        $user = User::with('userRole')->findOrFail($id);
+        // Ambil data user beserta relasi userRoles
+        $user = User::with('userRoles')->findOrFail($id);
 
         // Ambil semua role
         $roles = Role::all();

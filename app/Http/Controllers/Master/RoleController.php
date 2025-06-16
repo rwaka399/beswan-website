@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Master;
 use App\Http\Controllers\Controller;
 
 use App\Models\Role;
+use App\Models\Menu;
+use App\Models\RoleMenu;
+use App\Models\RolePermission;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -40,8 +43,26 @@ class RoleController extends Controller
      */
     public function create()
     {
+        // Get all menus for permission assignment
+        $menus = Menu::whereNull('menu_parent')
+            ->with(['children' => function($query) {
+                $query->orderBy('menu_urutan');
+            }])
+            ->orderBy('menu_urutan')
+            ->get();
+        
+        // Available permission types
+        $availablePermissions = [
+            'view' => 'View',
+            'create' => 'Create',
+            'edit' => 'Edit',
+            'delete' => 'Delete',
+            'manage' => 'Manage',
+            'config' => 'Config',
+            'execute' => 'Execute'
+        ];
 
-        return view('master.role.create');
+        return view('master.role.create', compact('menus', 'availablePermissions'));
     }
 
     /**
@@ -52,23 +73,59 @@ class RoleController extends Controller
         $request->validate([
             'role_name' => 'required|string|max:255|unique:roles',
             'role_description' => 'required|string|max:255',
+            'menus' => 'array',
+            'permissions' => 'array',
         ]);
-
 
         DB::beginTransaction();
         try {
-            Role::create([
+            // Create role
+            $role = Role::create([
                 'role_name' => $request->role_name,
                 'role_description' => $request->role_description,
                 'created_by' => Auth::user()->user_id,
             ]);
 
+            // Create role menus
+            if ($request->filled('menus')) {
+                foreach ($request->menus as $menuId) {
+                    RoleMenu::create([
+                        'role_id' => $role->role_id,
+                        'menu_id' => $menuId,
+                        'created_by' => Auth::user()->user_id,
+                        'updated_by' => Auth::user()->user_id,
+                    ]);
+                }
+            }
+
+            // Create role permissions
+            if ($request->filled('permissions')) {
+                foreach ($request->permissions as $menuId => $permissions) {
+                    // Get role_menu_id for this menu
+                    $roleMenu = RoleMenu::where('role_id', $role->role_id)->where('menu_id', $menuId)->first();
+                    
+                    if ($roleMenu) {
+                        foreach ($permissions as $permission) {
+                            RolePermission::create([
+                                'role_id' => $role->role_id,
+                                'menu_id' => $menuId,
+                                'role_menu_id' => $roleMenu->role_menu_id,
+                                'slug' => $permission,
+                                'value' => true,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                        }
+                    }
+                }
+            }
+
             DB::commit();
 
-            return redirect()->route('role-index')->with('success', 'Role created successfully.');
+            return redirect()->route('role-index')->with('success', 'Role and permissions created successfully.');
         } catch (\Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('error', 'Failed to create role.');
+            return redirect()->back()->with('error', 'Failed to create role. Error: ' . $e->getMessage());
         }
     }
 
@@ -83,8 +140,37 @@ class RoleController extends Controller
     public function edit($id)
     {
         $role = Role::findOrFail($id);
+        
+        // Get all menus
+        $menus = Menu::whereNull('menu_parent')
+            ->with(['children' => function($query) {
+                $query->orderBy('menu_urutan');
+            }])
+            ->orderBy('menu_urutan')
+            ->get();
+        
+        // Get current role menus
+        $roleMenus = RoleMenu::where('role_id', $role->role_id)
+            ->pluck('menu_id')
+            ->toArray();
+        
+        // Get current permissions grouped by menu
+        $rolePermissions = RolePermission::where('role_id', $role->role_id)
+            ->get()
+            ->groupBy('menu_id');
+        
+        // Available permission types
+        $availablePermissions = [
+            'view' => 'View',
+            'create' => 'Create',
+            'edit' => 'Edit',
+            'delete' => 'Delete',
+            'manage' => 'Manage',
+            'config' => 'Config',
+            'execute' => 'Execute'
+        ];
 
-        return view('master.role.edit', compact('role'));
+        return view('master.role.edit', compact('role', 'menus', 'roleMenus', 'rolePermissions', 'availablePermissions'));
     }
 
     /**
@@ -95,10 +181,13 @@ class RoleController extends Controller
         $request->validate([
             'role_name' => 'required|string|max:255|unique:roles,role_name,' . $id . ',role_id',
             'role_description' => 'nullable|string|max:255',
+            'menus' => 'array',
+            'permissions' => 'array',
         ]);
 
         DB::beginTransaction();
         try {
+            // Update role data
             Role::where('role_id', $id)->update([
                 'role_name'         => $request->role_name,
                 'role_description'  => $request->role_description,
@@ -106,11 +195,49 @@ class RoleController extends Controller
                 'updated_by'        => Auth::user()->user_id,
             ]);
 
+            // Update role menus
+            RoleMenu::where('role_id', $id)->delete();
+            
+            if ($request->filled('menus')) {
+                foreach ($request->menus as $menuId) {
+                    RoleMenu::create([
+                        'role_id' => $id,
+                        'menu_id' => $menuId,
+                        'created_by' => Auth::user()->user_id,
+                        'updated_by' => Auth::user()->user_id,
+                    ]);
+                }
+            }
+
+            // Update role permissions
+            RolePermission::where('role_id', $id)->delete();
+            
+            if ($request->filled('permissions')) {
+                foreach ($request->permissions as $menuId => $permissions) {
+                    // Get role_menu_id for this menu
+                    $roleMenu = RoleMenu::where('role_id', $id)->where('menu_id', $menuId)->first();
+                    
+                    if ($roleMenu) {
+                        foreach ($permissions as $permission) {
+                            RolePermission::create([
+                                'role_id' => $id,
+                                'menu_id' => $menuId,
+                                'role_menu_id' => $roleMenu->role_menu_id,
+                                'slug' => $permission,
+                                'value' => true,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                        }
+                    }
+                }
+            }
+
             DB::commit();
-            return redirect()->route('role-index')->with('success', 'Role updated successfully.');
+            return redirect()->route('role-index')->with('success', 'Role and permissions updated successfully.');
         } catch (\Exception $e) {
             DB::rollback();
-            return redirect()->back()->with('error', 'Failed to update role.');
+            return redirect()->back()->with('error', 'Failed to update role. Error: ' . $e->getMessage());
         }
     }
 

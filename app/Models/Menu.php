@@ -54,11 +54,11 @@ class Menu extends Model
     }
 
     /**
-     * Get all of the roleMenu for the Menu
+     * Get all of the roleMenus for the Menu
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function roleMenu(): HasMany
+    public function roleMenus(): HasMany
     {
         return $this->hasMany(RoleMenu::class, 'menu_id', 'menu_id');
     }

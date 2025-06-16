@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Auto close expired attendances every 5 minutes
+        $schedule->command('attendance:auto-close')->everyFiveMinutes();
     }
 
     /**

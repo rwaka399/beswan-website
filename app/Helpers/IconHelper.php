@@ -22,6 +22,8 @@ class IconHelper
             'fas fa-user' => '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />',
             'fas fa-history' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9h14l-2-9M9 21a1 1 0 11-2 0 1 1 0 012 0zm8 0a1 1 0 11-2 0 1 1 0 012 0z" />',
             'fas fa-sign-out-alt' => '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />',
+            'fas fa-clipboard-check' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2M15 13l-3 3m0 0l-3-3m3 3V8"/>',
+            'fas fa-user-check' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/>',
         ];
 
         return $iconMap[$iconClass] ?? '<circle cx="12" cy="12" r="3" />';
@@ -29,25 +31,26 @@ class IconHelper
 
     /**
      * Get route name from menu link
-     */    public static function getRouteFromLink($menuLink)
-    {
+     */    public static function getRouteFromLink($menuLink)    {
         $routeMap = [
+            '/' => 'home',
             '/master' => 'dashboard',
             '/master/user' => 'user-index',
             '/master/role' => 'role-index',
             '/master/menu' => 'menu-index',
             '/master/menu/create' => 'menu-create',
-            '/master/kelas' => 'lesson-package-index',
+            '/master/lesson_package' => 'lesson-package-index',
             '/master/financial' => 'financial-index',
             '/master/financial/create' => 'financial-create',
             '/master/financial/report' => 'financial-report',
             '/master/financial/dashboard' => 'financial-dashboard',
-            '/master/setting' => 'settings',
-            '/master/attendece' => '#', // Route belum dibuat
-            '/guru/attendece' => '#', // Route belum dibuat
+            '/master/settings' => 'settings',
+            '/master/attendance' => 'master.attendance.index',
+            '/master/attendance/create' => 'master.attendance.create',
+            '/guru/attendance' => 'teacher.attendance.index',
+            '/guru/attendance/history' => 'teacher.attendance.history',
             '/profile' => 'profile-index',
             '/profile/history' => 'history',
-            '/home' => 'home',
             '/logout' => 'logout',
         ];
 

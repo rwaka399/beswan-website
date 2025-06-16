@@ -49,7 +49,7 @@ class AuthController extends Controller
                 Auth::login($user, $request->has('remember'));
 
                 // Ambil role pertama user
-                $userRole = $user->userRole->first();
+                $userRole = $user->userRoles()->first();
 
                 if (!$userRole) {
                     Auth::logout();
@@ -61,17 +61,24 @@ class AuthController extends Controller
                     'user_id' => $user->user_id,
                 ]);
 
-                // dd(Session::all());
-
+                // Redirect based on role
+                $roleName = $user->getRoleName();
+                
                 if ($request->expectsJson()) {
-                return response()->json([
-                    'message' => 'Login successful!',
-                    'user' => $user,
-                    'role_id' => $userRole->role_id,
-                ]);
-            }
+                    return response()->json([
+                        'message' => 'Login successful!',
+                        'user' => $user,
+                        'role_id' => $userRole->role_id,
+                        'role_name' => $roleName,
+                    ]);
+                }
 
-                return redirect()->intended('/')->with('success', 'Login successful! Welcome back.');
+                // Redirect based on user role
+                if (in_array($roleName, ['Admin', 'Guru'])) {
+                    return redirect()->intended('/master')->with('success', 'Login successful! Welcome to dashboard.');
+                } else {
+                    return redirect()->intended('/')->with('success', 'Login successful! Welcome back.');
+                }
             }
 
             // Kalau kombinasi user dan password salah
@@ -154,11 +161,13 @@ class AuthController extends Controller
 
             // Login dan set session
             Auth::login($user);
+            $userRole = $user->userRoles()->first();
             Session::put([
-                'role_id' => $user->userRole->first()->role_id,
+                'role_id' => $userRole->role_id,
                 'user_id' => $user->user_id,
             ]);
 
+            // User baru otomatis role "User", redirect ke home
             return redirect()->intended('/')->with('success', 'Registration successful! Welcome to the platform.');
         } catch (\Exception $e) {
             DB::rollBack();

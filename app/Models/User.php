@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -55,20 +56,39 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function userRole():HasMany
+    public function userRoles(): HasMany
     {
         return $this->hasMany(UserRole::class, 'user_id', 'user_id');
     }
 
+    /**
+     * Get the roles for this user through userRole relationship
+     */
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id', 'user_id', 'role_id');
+    }
+
+    /**
+     * Get the primary role for this user
+     */
+    public function role(): ?Role
+    {
+        return $this->userRoles()->with('role')->first()?->role;
+    }
+
     // Relasi dengan Invoice
-    public function invoices()
+    public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class, 'user_id', 'user_id');
     }
 
+    /**
+     * Check if user is admin
+     */
     public function isAdmin()
     {
-        return $this->role && $this->role->role_name === 'Admin';
+        return $this->hasRole('Admin') || $this->user_id === 1;
     }
 
     /**
@@ -76,7 +96,7 @@ class User extends Authenticatable
      */
     public function hasPermission($menuSlug, $permission)
     {
-        $userRole = $this->userRole()->with('role')->first();
+        $userRole = $this->userRoles()->with('role')->first();
         
         if (!$userRole || !$userRole->role) {
             return false;
@@ -90,7 +110,7 @@ class User extends Authenticatable
      */
     public function canAccessMaster()
     {
-        $userRole = $this->userRole()->with('role')->first();
+        $userRole = $this->userRoles()->with('role')->first();
         
         if (!$userRole || !$userRole->role) {
             return false;
@@ -101,11 +121,32 @@ class User extends Authenticatable
     }
 
     /**
-     * Get user's role name
+     * Check if user has specific role
+     */
+    public function hasRole($roleName)
+    {
+        // Use cached relationship if already loaded
+        if ($this->relationLoaded('roles')) {
+            return $this->roles->contains('role_name', $roleName);
+        }
+        
+        return $this->roles()->where('role_name', $roleName)->exists();
+    }
+
+    /**
+     * Get all role names for this user
+     */
+    public function getRoleNames()
+    {
+        return $this->roles()->pluck('role_name')->toArray();
+    }
+
+    /**
+     * Get user's role name (first role if multiple)
      */
     public function getRoleName()
     {
-        $userRole = $this->userRole()->with('role')->first();
+        $userRole = $this->userRoles()->with('role')->first();
         
         if (!$userRole || !$userRole->role) {
             return null;

@@ -89,7 +89,7 @@ class FinancialLogController extends Controller
     {
         // Validasi input - dengan null safety untuk role
         $user = Auth::user();
-        $userAdmin = ($user && $user->role && $user->role->role_name === 'Admin') ? Auth::id() : null;
+        $userAdmin = ($user->userRoles() === 'Admin') ? Auth::id() : null;
 
         $request->merge([
             'user_id' => Auth::id(), // Set user_id to authenticated user

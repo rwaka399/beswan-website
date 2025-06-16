@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\FinancialLogController;
 use App\Http\Controllers\LessonPackageController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\Master\RoleController;
 use App\Http\Controllers\Master\UserController;
 use App\Http\Controllers\Master\MenuController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TeacherAttendanceController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ViewController;
 use Illuminate\Support\Facades\Route;
@@ -104,7 +106,26 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/dashboard', [FinancialLogController::class, 'dashboard'])->name('financial-dashboard');
         });
 
+        // Attendance Routes for Admin
+        Route::prefix('/attendance')->name('master.attendance.')->group(function () {
+            Route::get('/', [AttendanceController::class, 'index'])->name('index');
+            Route::get('/create', [AttendanceController::class, 'create'])->name('create');
+            Route::post('/store', [AttendanceController::class, 'store'])->name('store');
+            Route::get('/show/{attendance}', [AttendanceController::class, 'show'])->name('show');
+            Route::patch('/close/{attendance}', [AttendanceController::class, 'close'])->name('close');
+            Route::patch('/reopen/{attendance}', [AttendanceController::class, 'reopen'])->name('reopen');
+        });
+
         Route::get('/settings', [ConfigController::class, 'index'])->name('settings');
+    });
+
+    // Teacher Attendance Routes
+    Route::prefix('/guru')->name('teacher.')->group(function () {
+        Route::prefix('/attendance')->name('attendance.')->group(function () {
+            Route::get('/', [TeacherAttendanceController::class, 'index'])->name('index');
+            Route::post('/check-in', [TeacherAttendanceController::class, 'checkIn'])->name('check-in');
+            Route::get('/history', [TeacherAttendanceController::class, 'history'])->name('history');
+        });
     });
 
     Route::prefix('/transaction')->group(function () {

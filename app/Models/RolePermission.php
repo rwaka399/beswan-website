@@ -42,10 +42,10 @@ class RolePermission extends Model
         return $this->belongsTo(RoleMenu::class, 'role_menu_id', 'role_menu_id');
     }
 
-    public static function isHasPermission($role_id, $permisssion_slug)
+    public static function isHasPermission($role_id, $permission_slug)
     {
         $permission = RolePermission::where('role_id', $role_id)
-            ->where('slug', $permisssion_slug)
+            ->where('slug', $permission_slug)
             ->first();
         if ($permission && $permission->value === true) {
             return true;

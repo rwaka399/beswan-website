@@ -52,6 +52,7 @@ class LessonPackageController extends Controller
             'lesson_package_name' => 'required|string|max:100',
             'lesson_package_description' => 'nullable|string|max:255',
             'lesson_duration' => 'required|integer|min:1',
+            'duration_unit' => 'required|in:hari,minggu,bulan',
             'lesson_package_price' => 'required|integer|min:0',
         ]);
 
@@ -61,6 +62,7 @@ class LessonPackageController extends Controller
                 'lesson_package_name' => $request->lesson_package_name,
                 'lesson_package_description' => $request->lesson_package_description,
                 'lesson_duration' => $request->lesson_duration,
+                'duration_unit' => $request->duration_unit,
                 'lesson_package_price' => $request->lesson_package_price,
                 'created_by' => Auth::user()->user_id,
             ]);
@@ -91,6 +93,7 @@ class LessonPackageController extends Controller
             'lesson_package_name' => 'required|string|max:100',
             'lesson_package_description' => 'nullable|string|max:255',
             'lesson_duration' => 'required|integer|min:1',
+            'duration_unit' => 'required|in:hari,minggu,bulan',
             'lesson_package_price' => 'required|integer|min:0',
         ]);
 
@@ -100,6 +103,7 @@ class LessonPackageController extends Controller
                 'lesson_package_name' => $request->lesson_package_name,
                 'lesson_package_description' => $request->lesson_package_description,
                 'lesson_duration' => $request->lesson_duration,
+                'duration_unit' => $request->duration_unit,
                 'lesson_package_price' => $request->lesson_package_price,
                 'updated_by' => Auth::user()->user_id,
                 'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
