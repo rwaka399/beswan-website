@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
             ['email' => 'raka.test@gmail.com'],
             [
                 'name'          => 'Admin',
-                'password'      => Hash::make('rakaraka1'),
+                'password'      => Hash::make('Raka1234'),
                 'phone_number'  => '08123456789',
                 'address'       => 'jl.rambutan'
             ]
@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
             ['email' => 'guru.test@gmail.com'],
             [
                 'name'          => 'Guru',
-                'password'      => Hash::make('guruguru123'),
+                'password'      => Hash::make('Guru1234'),
                 'phone_number'  => '08123456789',
                 'address'       => 'jl.mangga'
             ]
@@ -38,7 +38,7 @@ class UserSeeder extends Seeder
             ['email' => 'user.test@gmail.com'],
             [
                 'name'          => 'User',
-                'password'      => Hash::make('useruser123'),   
+                'password'      => Hash::make('User1234'),   
                 'phone_number'  => '08123456789',
                 'address'       => 'jl.durian'
             ]
@@ -48,7 +48,7 @@ class UserSeeder extends Seeder
             ['email' => 'siti.test@gmail.com'],
             [
                 'name'          => 'Siti Mujaer',
-                'password'      => Hash::make('siti1234'),   
+                'password'      => Hash::make('Siti1234'),   
                 'phone_number'  => '08123456789',
                 'address'       => 'jl.durian'
             ]

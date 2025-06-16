@@ -5,7 +5,7 @@ namespace App\Providers;
 use App\Models\Menu;
 use App\Models\User;
 use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 
 class MenuServiceProvider extends ServiceProvider
@@ -18,47 +18,30 @@ class MenuServiceProvider extends ServiceProvider
         //
     }    /**
      * Bootstrap any application services.
-     */
-    public function boot(): void
+     */    public function boot(): void
     {
         // Share master menus with all master layout views
         View::composer('master.*', function ($view) {
             $user = auth()->user();
-            $userMenuIds = [];
+            $menus = collect();
             
-            if ($user) {
-                // Get user's role menu IDs through role-menu relationship
-                $userMenuIds = DB::table('user_roles')
-                    ->join('role_menus', 'user_roles.role_id', '=', 'role_menus.role_id')
-                    ->where('user_roles.user_id', $user->user_id)
-                    ->pluck('role_menus.menu_id')
-                    ->toArray();
-            }
-              // Get menus that user has access to
-            $menuQuery = Menu::whereIn('menu_slug', [
-                'dashboard', 'user', 'role', 'menu', 'lesson_package', 'keuangan', 'settings', 'attendance', 'home', 'logout'
-            ])
-            ->whereNull('menu_parent')
-            ->orderBy('menu_urutan');
-            
-            // Filter by user's accessible menus
-            if (!empty($userMenuIds)) {
-                $menuQuery->whereIn('menu_id', $userMenuIds);
-            } else {
-                // If user has no role-menu access, return empty collection
-                $menuQuery->where('menu_id', -1); // This will return no results
-            }
-            
-            $menus = $menuQuery->with(['children' => function($query) use ($userMenuIds) {
-                // Filter children menu based on user's role-menu access
-                if (!empty($userMenuIds)) {
-                    $query->whereIn('menu_id', $userMenuIds);
-                } else {
-                    $query->where('menu_id', -1); // No access
+            if ($user && Auth::guard('web')->check()) {
+                // Get menu tree from session claimed by CustomSessionGuard
+                $guard = Auth::guard('web');
+                
+                if ($guard instanceof \App\Guards\CustomSessionGuard) {
+                    $sessionMenus = $guard->getUserMenus();
+                    
+                    // Convert session menu tree to Laravel collection format
+                    $menus = collect($sessionMenus)->map(function ($menuData) {
+                        $menu = (object) $menuData;
+                        $menu->children = collect($menuData['children'] ?? [])->map(function ($childData) {
+                            return (object) $childData;
+                        });
+                        return $menu;
+                    });
                 }
-                $query->orderBy('menu_urutan');
-            }])
-            ->get();
+            }
 
             $view->with('menus', $menus);
         });

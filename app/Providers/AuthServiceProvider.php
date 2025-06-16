@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
-// use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Auth;
+use App\Guards\CustomSessionGuard;
+use App\Models\User;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -21,6 +23,16 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Register custom session guard
+        Auth::extend('custom-session', function ($app, $name, array $config) {
+            $provider = $app['auth']->createUserProvider($config['provider']);
+            $guard = new CustomSessionGuard($name, $provider, $app['session.store']);
+            
+            $guard->setCookieJar($app['cookie']);
+            $guard->setDispatcher($app['events']);
+            $guard->setRequest($app->refresh('request', $guard, 'setRequest'));
+            
+            return $guard;
+        });
     }
 }

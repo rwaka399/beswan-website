@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -26,5 +27,22 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    /**
+     * Render an exception into an HTTP response.
+     */
+    public function render($request, Throwable $exception)
+    {
+        // Handle 403 Forbidden responses with custom view
+        if ($exception instanceof HttpException) {
+            $statusCode = $exception->getStatusCode();
+            
+            if ($statusCode == 403) {
+                return response()->view('errors.403', ['exception' => $exception], 403);
+            }
+        }
+
+        return parent::render($request, $exception);
     }
 }

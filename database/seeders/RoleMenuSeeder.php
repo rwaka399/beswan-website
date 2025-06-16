@@ -32,6 +32,8 @@ class RoleMenuSeeder extends Seeder
         $keuanganMenu = Menu::where('menu_slug', 'keuangan')->first();
         $settingMenu = Menu::where('menu_slug', 'settings')->first();
         $attendanceMenu = Menu::where('menu_slug', 'attendance')->first();
+        $profileMenu = Menu::where('menu_slug', 'profile')->first();
+        $historyMenu = Menu::where('menu_slug', 'history_transaksi')->first();
         $homeMenu = Menu::where('menu_slug', 'home')->first();
         $logoutMenu = Menu::where('menu_slug', 'logout')->first();
 
@@ -47,9 +49,7 @@ class RoleMenuSeeder extends Seeder
         $keuanganLogChild = Menu::where('menu_slug', 'keuangan-log')->first();
         $keuanganTambahChild = Menu::where('menu_slug', 'keuangan-tambah')->first();
         $keuanganLaporanChild = Menu::where('menu_slug', 'laporan-keuangan')->first();
-        $keuanganDashboardChild = Menu::where('menu_slug', 'keuangan-dashboard')->first();
-
-        // ROLE ADMIN - Akses ke semua menu master
+        $keuanganDashboardChild = Menu::where('menu_slug', 'keuangan-dashboard')->first();        // ROLE ADMIN - Akses ke semua menu master kecuali history transaksi dan attendance guru
         if ($adminRole) {
             $adminMenus = [
                 $dashboardMenu,
@@ -60,9 +60,13 @@ class RoleMenuSeeder extends Seeder
                 $keuanganMenu,
                 $settingMenu,
                 $attendanceMenu,
+                $profileMenu,  // Admin bisa akses profile
                 $homeMenu,
                 $logoutMenu
-            ];            foreach ($adminMenus as $menu) {
+                // Tidak termasuk: $historyMenu (history transaksi)
+            ];
+
+            foreach ($adminMenus as $menu) {
                 if ($menu) {
                     RoleMenu::updateOrCreate(
                         [
@@ -77,17 +81,19 @@ class RoleMenuSeeder extends Seeder
                 }
             }
 
-            // Admin juga bisa akses semua child menu
+            // Admin bisa akses semua child menu kecuali attendance guru
             $adminChildMenus = [
-                $attendanceMaster,
-                $attendanceGuru,
+                $attendanceMaster,  // Admin bisa kelola attendance
+                // $attendanceGuru,  // TIDAK TERMASUK - Admin tidak bisa akses attendance guru
                 $menuIndexChild,
                 $menuCreateChild,
                 $keuanganLogChild,
                 $keuanganTambahChild,
                 $keuanganLaporanChild,
                 $keuanganDashboardChild
-            ];            foreach ($adminChildMenus as $childMenu) {
+            ];
+
+            foreach ($adminChildMenus as $childMenu) {
                 if ($childMenu) {
                     RoleMenu::updateOrCreate(
                         [
@@ -101,15 +107,16 @@ class RoleMenuSeeder extends Seeder
                     );
                 }
             }
-        }
-
-        // ROLE GURU - Hanya akses ke attendance, home, dan logout
+        }        // ROLE GURU - Hanya akses ke Attendance, Attendance Guru, Profile, Home, dan Logout
         if ($guruRole) {
             $guruMenus = [
                 $attendanceMenu,  // Parent menu attendance
+                $profileMenu,     // Guru bisa akses profile
                 $homeMenu,
                 $logoutMenu
-            ];            foreach ($guruMenus as $menu) {
+            ];
+
+            foreach ($guruMenus as $menu) {
                 if ($menu) {
                     RoleMenu::updateOrCreate(
                         [
@@ -122,7 +129,9 @@ class RoleMenuSeeder extends Seeder
                         ]
                     );
                 }
-            }            // Guru hanya bisa akses menu "Attendance Guru" (tidak bisa kelola attendance)
+            }
+
+            // Guru hanya bisa akses menu "Attendance Guru" (tidak bisa kelola attendance)
             if ($attendanceGuru) {
                 RoleMenu::updateOrCreate(
                     [
@@ -135,10 +144,30 @@ class RoleMenuSeeder extends Seeder
                     ]
                 );
             }
-        }
+        }        // ROLE USER - Hanya bisa akses Profile, History Transaksi, Home, dan Logout
+        // User tidak memiliki akses ke halaman master sama sekali
+        if ($userRole) {
+            $userMenus = [
+                $profileMenu,     // User bisa akses profile
+                $historyMenu,     // User bisa akses history transaksi
+                $homeMenu,        // User bisa akses home
+                $logoutMenu       // User bisa logout
+            ];
 
-        // ROLE USER - Tidak ada akses ke menu master (kosong)
-        // User role tidak memiliki akses ke halaman master sama sekali
-        // Mereka hanya bisa mengakses halaman profile yang terpisah
+            foreach ($userMenus as $menu) {
+                if ($menu) {
+                    RoleMenu::updateOrCreate(
+                        [
+                            'role_id' => $userRole->role_id,
+                            'menu_id' => $menu->menu_id,
+                        ],
+                        [
+                            'created_by' => $admin->user_id,
+                            'updated_by' => $admin->user_id,
+                        ]
+                    );
+                }
+            }
+        }
     }
 }

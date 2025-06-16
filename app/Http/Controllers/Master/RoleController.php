@@ -51,15 +51,12 @@ class RoleController extends Controller
             ->orderBy('menu_urutan')
             ->get();
         
-        // Available permission types
+        // Available permission types (CRUD only)
         $availablePermissions = [
-            'view' => 'View',
             'create' => 'Create',
-            'edit' => 'Edit',
-            'delete' => 'Delete',
-            'manage' => 'Manage',
-            'config' => 'Config',
-            'execute' => 'Execute'
+            'read' => 'Read',
+            'update' => 'Update',
+            'delete' => 'Delete'
         ];
 
         return view('master.role.create', compact('menus', 'availablePermissions'));
@@ -159,15 +156,12 @@ class RoleController extends Controller
             ->get()
             ->groupBy('menu_id');
         
-        // Available permission types
+        // Available permission types (CRUD only)
         $availablePermissions = [
-            'view' => 'View',
             'create' => 'Create',
-            'edit' => 'Edit',
-            'delete' => 'Delete',
-            'manage' => 'Manage',
-            'config' => 'Config',
-            'execute' => 'Execute'
+            'read' => 'Read',
+            'update' => 'Update',
+            'delete' => 'Delete'
         ];
 
         return view('master.role.edit', compact('role', 'menus', 'roleMenus', 'rolePermissions', 'availablePermissions'));
