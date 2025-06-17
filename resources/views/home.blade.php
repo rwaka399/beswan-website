@@ -177,6 +177,10 @@
                             </svg>
                             Status Premium Aktif
                         </div>
+                        <p class="mt-2 text-sm text-gray-600">
+                            Sisa waktu premium: <strong>{{ Auth::user()->getRemainingPremiumDays() }} hari</strong> | 
+                            Beli paket di bawah untuk perpanjang premium
+                        </p>
                     @endif
                 @endauth
             </div>
@@ -217,6 +221,16 @@
                             <p class="text-xs text-gray-500 mt-1">
                                 ({{ $package->duration_in_days }} hari akses penuh)
                             </p>
+                            
+                            @auth
+                                @if(Auth::user() && Auth::user()->isPremium())
+                                    <div class="mt-2 p-2 bg-purple-50 rounded border border-purple-200">
+                                        <p class="text-xs text-purple-700 text-center">
+                                            <strong>Perpanjangan:</strong> Waktu akan ditambah setelah premium saat ini berakhir
+                                        </p>
+                                    </div>
+                                @endif
+                            @endauth
                         </div>
 
                         <!-- Price -->
@@ -232,9 +246,15 @@
                         <!-- Button -->
                         @auth
                             @if(Auth::user() && Auth::user()->isPremium())
-                                <span class="inline-block px-6 py-3 bg-green-100 text-green-800 font-semibold rounded-full">
-                                    ✓ Sudah Premium
-                                </span>
+                                <div class="space-y-2">
+                                    <span class="block text-center px-6 py-2 bg-green-100 text-green-800 font-semibold rounded-lg text-sm">
+                                        ✓ Premium Aktif
+                                    </span>
+                                    <a href="{{ route('transaction.checkout', $package->lesson_package_id) }}"
+                                        class="inline-block w-full px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-purple-800 transition duration-200 transform hover:scale-105 text-sm">
+                                        Perpanjang Premium
+                                    </a>
+                                </div>
                             @else
                                 <a href="{{ route('transaction.checkout', $package->lesson_package_id) }}"
                                     class="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition duration-200 transform hover:scale-105">

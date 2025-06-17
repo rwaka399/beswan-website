@@ -227,9 +227,9 @@ class TransactionController extends Controller
 
             // Catat ke financial log jika PAID
             if ($status === 'PAID') {
-                $existingLog = \App\Models\FinancialLog::where('invoice_id', $invoice->invoice_id)->first();
+                $existingLog = FinancialLog::where('invoice_id', $invoice->invoice_id)->first();
                 if (!$existingLog) {
-                    \App\Models\FinancialLog::create([
+                    FinancialLog::create([
                         'invoice_id' => $invoice->invoice_id,
                         'user_id' => $invoice->user_id,
                         'amount' => $invoice->amount,
