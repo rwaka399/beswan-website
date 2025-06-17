@@ -141,27 +141,3 @@ Route::middleware(['auth'])->group(function () {
 
 Route::post('/xendit/webhook', [TransactionController::class, 'handleWebhook'])->name('xendit.webhook');
 
-// Debug route for testing custom auth (remove in production)
-Route::get('/debug-session', function() {
-    if (!Auth::check()) {
-        return 'User not authenticated';
-    }
-    
-    $guard = Auth::guard('web');
-    if ($guard instanceof \App\Guards\CustomSessionGuard) {
-        return [
-            'guard_type' => get_class($guard),
-            'user_authenticated' => Auth::check(),
-            'user_basic' => Auth::user(),
-            'user_data' => $guard->getUserData(),
-            'role' => $guard->getUserRole(),
-            'menus' => $guard->getUserMenus(),
-            'permissions' => $guard->getUserPermissions(),
-            'session_data' => session()->all()
-        ];
-    }
-    return [
-        'error' => 'Guard is not CustomSessionGuard',
-        'guard_type' => get_class($guard)
-    ];
-})->middleware('auth');
