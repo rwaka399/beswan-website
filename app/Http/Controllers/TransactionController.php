@@ -49,7 +49,13 @@ class TransactionController extends Controller
     public function showCheckout($lessonPackageId)
     {
         $package = LessonPackage::findOrFail($lessonPackageId);
-        return view('transaction.checkout', compact('package'));
+        
+        // Menghitung tanggal minimal (hari ini) dan maksimal (3 bulan dari sekarang)
+        // untuk datepicker
+        $minDate = Carbon::today()->format('Y-m-d');
+        $maxDate = Carbon::today()->addMonths(3)->format('Y-m-d');
+        
+        return view('transaction.checkout', compact('package', 'minDate', 'maxDate'));
     }
 
     public function createInvoice(Request $request)
@@ -70,6 +76,8 @@ class TransactionController extends Controller
             'lesson_package_id' => 'required|exists:lesson_packages,lesson_package_id',
             'email' => 'required|email',
             'payment_method' => 'required|in:' . implode(',', $allowedPaymentMethods),
+            'scheduled_start_date' => 'required|date|after_or_equal:today',
+            'schedule_notes' => 'nullable|string|max:255',
         ]);
 
         try {
@@ -268,6 +276,8 @@ class TransactionController extends Controller
                             'user_id' => $user->user_id,
                             'lesson_package_id' => $package->lesson_package_id,
                             'invoice_id' => $invoice->invoice_id,
+                            'purchased_at' => $paidAt,
+                            'scheduled_start_date' => $startDate,
                             'start_date' => $startDate,
                             'end_date' => $endDate,
                             'status' => 'active',

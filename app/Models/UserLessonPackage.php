@@ -16,12 +16,17 @@ class UserLessonPackage extends Model
         'user_id',
         'lesson_package_id',
         'invoice_id',
+        'purchased_at',
+        'scheduled_start_date',
         'start_date',
         'end_date',
         'status',
+        'notes',
     ];
 
     protected $casts = [
+        'purchased_at' => 'datetime',
+        'scheduled_start_date' => 'datetime',
         'start_date' => 'datetime',
         'end_date' => 'datetime',
     ];
@@ -42,5 +47,41 @@ class UserLessonPackage extends Model
     public function invoice() :BelongsTo
     {
         return $this->belongsTo(Invoice::class, 'invoice_id', 'invoice_id');
+    }
+
+    /**
+     * Memeriksa apakah paket sudah waktunya diaktifkan
+     * 
+     * @return bool
+     */
+    public function shouldBeActivated()
+    {
+        return $this->status === 'scheduled' && 
+               now()->greaterThanOrEqualTo($this->scheduled_start_date);
+    }
+
+    /**
+     * Mengaktifkan paket yang masuk jadwal
+     * 
+     * @return bool
+     */
+    public function activateIfScheduled()
+    {
+        if ($this->shouldBeActivated()) {
+            $this->status = 'active';
+            $this->start_date = now();
+            return $this->save();
+        }
+        
+        return false;
+    }
+
+    /**
+     * Scope untuk mendapatkan paket yang sudah dijadwalkan dan saatnya diaktifkan
+     */
+    public function scopeScheduledToStart($query)
+    {
+        return $query->where('status', 'scheduled')
+                    ->where('scheduled_start_date', '<=', now());
     }
 }

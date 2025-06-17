@@ -175,9 +175,25 @@ class User extends Authenticatable
                 return false;
             }
             
+            $now = now();
+            
+            // Aktifkan paket yang sudah dijadwalkan dan sudah waktunya dimulai
+            $scheduledPackages = $this->userLessonPackages()
+                ->where('status', 'scheduled')
+                ->where('scheduled_start_date', '<=', $now)
+                ->get();
+            
+            foreach ($scheduledPackages as $package) {
+                $package->status = 'active';
+                $package->start_date = $now;
+                $package->save();
+            }
+            
+            // Cek status premium (hanya paket yang status aktif dan masih dalam periode aktif)
             return $this->userLessonPackages()
                 ->where('status', 'active')
-                ->where('end_date', '>', now())
+                ->where('start_date', '<=', $now)
+                ->where('end_date', '>', $now)
                 ->exists();
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Error in isPremium method: ' . $e->getMessage());

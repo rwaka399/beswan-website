@@ -54,6 +54,24 @@
                     <span class="text-sm text-red-600">{{ $message }}</span>
                 @enderror
             </div>
+            
+            <div>
+                <label for="scheduled_start_date" class="block text-gray-700 font-semibold mb-1">Tanggal Mulai</label>
+                <input type="date" name="scheduled_start_date" id="scheduled_start_date"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    min="{{ $minDate }}" max="{{ $maxDate }}" value="{{ $minDate }}" required>
+                <p class="text-sm text-gray-500 mt-1">Pilih tanggal kapan Anda ingin memulai paket. Status premium akan aktif mulai tanggal ini.</p>
+                @error('scheduled_start_date')
+                    <span class="text-sm text-red-600">{{ $message }}</span>
+                @enderror
+            </div>
+            
+            <div>
+                <label for="schedule_notes" class="block text-gray-700 font-semibold mb-1">Catatan (Opsional)</label>
+                <textarea name="schedule_notes" id="schedule_notes"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-20"
+                    placeholder="Tambahkan catatan jika ada..."></textarea>
+            </div>
 
             <div>
                 <label class="block text-gray-700 font-semibold mb-3">Pilih Metode Pembayaran</label>
@@ -218,19 +236,26 @@
             }
 
             payButton.disabled = true;
-            payButton.textContent = 'Memproses...';
+            payButton.textContent = 'Memproses...';                const formData = new FormData(paymentForm);
+                
+                // Validasi tanggal mulai
+                const startDateInput = document.getElementById('scheduled_start_date');
+                if (!startDateInput.value) {
+                    alert('Harap pilih tanggal mulai.');
+                    payButton.disabled = false;
+                    payButton.textContent = 'Bayar Sekarang';
+                    return;
+                }
 
-            const formData = new FormData(paymentForm);
-
-            try {
-                const response = await fetch(paymentForm.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    },
-                });
+                try {
+                    const response = await fetch(paymentForm.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        },
+                    });
 
                 const result = await response.json();
 

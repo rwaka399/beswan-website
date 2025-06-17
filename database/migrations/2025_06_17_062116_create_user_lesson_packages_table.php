@@ -16,9 +16,12 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('lesson_package_id');
             $table->unsignedBigInteger('invoice_id')->nullable();
-            $table->timestamp('start_date');
-            $table->timestamp('end_date');
-            $table->enum('status', ['active', 'expired', 'pending'])->default('active');
+            $table->timestamp('purchased_at')->useCurrent(); // Waktu pembelian/checkout
+            $table->timestamp('scheduled_start_date'); // Tanggal yang dipilih user untuk mulai paket
+            $table->timestamp('start_date'); // Tanggal aktual mulainya paket (bisa sama dengan scheduled_start_date)
+            $table->timestamp('end_date'); // Tanggal berakhirnya paket
+            $table->enum('status', ['active', 'expired', 'pending', 'scheduled'])->default('scheduled'); // Tambah status 'scheduled'
+            $table->text('notes')->nullable(); // Untuk catatan tambahan terkait penjadwalan
             $table->timestamps();
 
             $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
