@@ -37,6 +37,14 @@ class LessonPackage extends Model
         return $this->hasMany(Invoice::class, 'lesson_package_id', 'lesson_package_id');
     }
 
+    /**
+     * Relasi ke UserLessonPackage
+     */
+    public function userLessonPackages()
+    {
+        return $this->hasMany(UserLessonPackage::class, 'lesson_package_id', 'lesson_package_id');
+    }
+
     // Method untuk menampilkan durasi yang user-friendly
     public function getFormattedDurationAttribute()
     {

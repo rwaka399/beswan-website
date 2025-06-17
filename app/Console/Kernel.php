@@ -14,6 +14,9 @@ class Kernel extends ConsoleKernel
     {
         // Auto close expired attendances every 5 minutes
         $schedule->command('attendance:auto-close')->everyFiveMinutes();
+        
+        // Update expired lesson packages daily at midnight
+        $schedule->command('packages:update-expired')->daily();
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Models\LessonPackage;
 use Illuminate\Support\Facades\Log;
 use App\Models\Transaction;
 use App\Models\Invoice;
+use App\Models\UserLessonPackage;
 use Carbon\Carbon;
 // use App\Models\LogKeuangan;
 use Illuminate\Http\Request;
@@ -29,11 +30,11 @@ class TransactionController extends Controller
     private function initializeXendit()
     {
         $apiKey = config('services.xendit.secret_key');
-        
+
         if (!$apiKey) {
             throw new \Exception('Xendit API key is not configured. Please set XENDIT_SECRET_KEY in your .env file.');
         }
-        
+
         Configuration::setXenditKey($apiKey);
         return new InvoiceApi();
     }
@@ -75,7 +76,7 @@ class TransactionController extends Controller
             $apiKey = config('services.xendit.secret_key');
             Log::info('Xendit API Key configured: ' . (empty($apiKey) ? 'NO' : 'YES'));
             Log::info('API Key length: ' . strlen($apiKey ?? ''));
-            
+
             if (empty($apiKey)) {
                 throw new \Exception('Xendit API key is not properly configured');
             }
@@ -238,6 +239,42 @@ class TransactionController extends Controller
                         'transaction_date' => $paidAt,
                     ]);
                     Log::info("Financial log created for invoice ID: {$invoice->invoice_id}");
+                }
+
+                // Berikan status premium kepada user
+                $user = $invoice->user;
+                $package = $invoice->lessonPackage;
+
+                if ($user && $package) {
+                    // Cek apakah sudah ada record untuk invoice ini
+                    $existingUserPackage = UserLessonPackage::where('invoice_id', $invoice->invoice_id)->first();
+                    
+                    if (!$existingUserPackage) {
+                        // Tentukan tanggal mulai premium
+                        $now = Carbon::now();
+
+                        // Jika user masih punya premium aktif, perpanjang dari end_date terakhir
+                        $lastActive = $user->userLessonPackages()
+                            ->where('status', 'active')
+                            ->where('end_date', '>', $now)
+                            ->orderByDesc('end_date')
+                            ->first();
+
+                        $startDate = $lastActive ? Carbon::parse($lastActive->end_date) : $now;
+                        $endDate = $package->getEndDate($startDate);
+
+                        // Buat record baru di user_lesson_packages
+                        UserLessonPackage::create([
+                            'user_id' => $user->user_id,
+                            'lesson_package_id' => $package->lesson_package_id,
+                            'invoice_id' => $invoice->invoice_id,
+                            'start_date' => $startDate,
+                            'end_date' => $endDate,
+                            'status' => 'active',
+                        ]);
+
+                        Log::info("User premium status activated for user ID: {$user->user_id}, package ID: {$package->lesson_package_id}");
+                    }
                 }
             }
 

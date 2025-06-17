@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Schema;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -84,6 +85,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Relasi ke UserLessonPackage
+     */
+    public function userLessonPackages()
+    {
+        return $this->hasMany(UserLessonPackage::class, 'user_id', 'user_id');
+    }
+
+    /**
      * Check if user is admin
      */
     public function isAdmin()
@@ -153,5 +162,70 @@ class User extends Authenticatable
         }
         
         return $userRole->role->role_name;
+    }
+
+    /**
+     * Mengecek apakah user saat ini berstatus premium
+     */
+    public function isPremium()
+    {
+        try {
+            // Cek apakah tabel ada dan dapat diakses
+            if (!Schema::hasTable('user_lesson_packages')) {
+                return false;
+            }
+            
+            return $this->userLessonPackages()
+                ->where('status', 'active')
+                ->where('end_date', '>', now())
+                ->exists();
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error in isPremium method: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Mendapatkan paket premium aktif
+     */
+    public function getActivePremiumPackage()
+    {
+        return $this->userLessonPackages()
+            ->where('status', 'active')
+            ->where('end_date', '>', now())
+            ->with('lessonPackage')
+            ->orderBy('end_date', 'desc')
+            ->first();
+    }
+
+    /**
+     * Mendapatkan semua paket premium aktif
+     */
+    public function getActivePremiumPackages()
+    {
+        return $this->userLessonPackages()
+            ->where('status', 'active')
+            ->where('end_date', '>', now())
+            ->with('lessonPackage')
+            ->orderBy('end_date', 'desc')
+            ->get();
+    }
+
+    /**
+     * Mendapatkan tanggal berakhir premium terjauh
+     */
+    public function getPremiumExpiryDate()
+    {
+        $package = $this->getActivePremiumPackage();
+        return $package ? $package->end_date : null;
+    }
+
+    /**
+     * Mendapatkan sisa hari premium
+     */
+    public function getRemainingPremiumDays()
+    {
+        $expiryDate = $this->getPremiumExpiryDate();
+        return $expiryDate ? now()->diffInDays($expiryDate, false) : 0;
     }
 }

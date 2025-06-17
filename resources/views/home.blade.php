@@ -44,7 +44,11 @@
                 @endguest
 
                 @auth
-                    <div x-data="{ open: false }" class="relative">
+                    <div x-data="{ open: false }" class="relative flex items-center gap-2">
+                        <!-- Badge Premium -->
+                        @if(Auth::user() && Auth::user()->isPremium())
+                            <span class="bg-yellow-400 text-gray-900 text-xs font-semibold px-3 py-1 rounded-full mr-2">Premium</span>
+                        @endif
                         <!-- Tombol avatar -->
                         <button @click="open = !open" class="focus:outline-none">
                             <img src="{{ Auth::user()->profile_picture ?? '/storage/default-avatar.png' }}" alt="Profile"
@@ -162,12 +166,23 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Header -->
             <div class="text-center mb-12">
-                <h2 class="text-4xl font-semibol text-gray-900 sm:text-5xl">Paket Pembelajaran</h2>
+                <h2 class="text-4xl font-semibold text-gray-900 sm:text-5xl">Paket Pembelajaran</h2>
                 <p class="mt-4 text-lg text-gray-600">Pilih paket yang sesuai dengan kebutuhan belajar Anda</p>
+                
+                @auth
+                    @if(Auth::user() && Auth::user()->isPremium())
+                        <div class="inline-flex items-center mt-6 px-4 py-2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white font-semibold rounded-full shadow-lg">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            Status Premium Aktif
+                        </div>
+                    @endif
+                @endauth
             </div>
 
             <!-- Packages Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 @forelse ($lessonPackages as $package)
                     <div
                         class="bg-white shadow-lg rounded-xl p-8 text-center transform transition duration-300 hover:shadow-xl hover:-translate-y-1">
@@ -188,23 +203,50 @@
                             {{ $package->lesson_package_description ?? 'Belajar dengan paket ini untuk pengalaman terbaik!' }}
                         </p>
 
-                        <!-- Duration -->
-                        <p class="mt-4 text-gray-700">
-                            Durasi:
-                            <span class="font-semibold">
-                                {{ $package->lesson_duration == 4 ? '1 bulan' : $package->lesson_duration . ' minggu' }}
-                            </span>
-                        </p>
+                        <!-- Duration Info -->
+                        <div class="bg-gray-50 rounded-lg p-4 mt-4 mb-4">
+                            <div class="flex items-center justify-center text-gray-700 mb-2">
+                                <svg class="w-4 h-4 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="text-sm font-medium">Durasi:</span>
+                            </div>
+                            <p class="text-lg font-bold text-blue-600">
+                                {{ $package->formatted_duration }}
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                ({{ $package->duration_in_days }} hari akses penuh)
+                            </p>
+                        </div>
 
                         <!-- Price -->
-                        <p class="mt-4 text-2xl font-bold text-gray-900">Rp
-                            {{ number_format($package->lesson_package_price, 0, ',', '.') }}</p>
+                        <div class="mb-4">
+                            <p class="text-3xl font-bold text-gray-900">
+                                Rp {{ number_format($package->lesson_package_price, 0, ',', '.') }}
+                            </p>
+                            <p class="text-sm text-gray-500">
+                                ~Rp {{ number_format($package->lesson_package_price / $package->duration_in_days, 0, ',', '.') }}/hari
+                            </p>
+                        </div>
 
                         <!-- Button -->
-                        <a href="{{ route('transaction.checkout', $package->lesson_package_id) }}"
-                            class="inline-block mt-6 px-6 py-3 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition duration-200">
-                            Daftar Sekarang
-                        </a>
+                        @auth
+                            @if(Auth::user() && Auth::user()->isPremium())
+                                <span class="inline-block px-6 py-3 bg-green-100 text-green-800 font-semibold rounded-full">
+                                    ✓ Sudah Premium
+                                </span>
+                            @else
+                                <a href="{{ route('transaction.checkout', $package->lesson_package_id) }}"
+                                    class="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition duration-200 transform hover:scale-105">
+                                    Beli Sekarang
+                                </a>
+                            @endif
+                        @else
+                            <a href="{{ route('login') }}"
+                                class="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 transition duration-200 transform hover:scale-105">
+                                Login untuk Membeli
+                            </a>
+                        @endauth
                     </div>
                 @empty
                     <div class="col-span-2 text-center py-10">

@@ -67,6 +67,10 @@
                         <span class="font-semibold text-gray-800">{{ $invoice->lessonPackage->lesson_package_name }}</span>
                     </div>
                     <div class="flex justify-between">
+                        <span class="text-gray-600">Durasi:</span>
+                        <span class="font-semibold text-blue-600">{{ $invoice->lessonPackage->formatted_duration }}</span>
+                    </div>
+                    <div class="flex justify-between">
                         <span class="text-gray-600">Total Bayar:</span>
                         <span class="font-bold text-green-600 text-lg">Rp {{ number_format($invoice->amount, 0, ',', '.') }}</span>
                     </div>
@@ -77,6 +81,52 @@
                 </div>
             </div>
         </div>
+
+        <!-- Premium Status Card -->
+        @if(auth()->user()->isPremium())
+        <div class="mb-8 fade-in-delay">
+            <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200">
+                <div class="flex items-center justify-center mb-4">
+                    <div class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white font-semibold rounded-full shadow-lg">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                        Status Premium Aktif!
+                    </div>
+                </div>
+                <p class="text-center text-gray-700 mb-4">
+                    Akun Anda telah berhasil di-upgrade ke Premium. Anda dapat mengakses semua materi pembelajaran yang tersedia.
+                </p>
+                
+                @php
+                    $latestPackage = auth()->user()->userLessonPackages()
+                        ->where('status', 'active')
+                        ->where('end_date', '>', now())
+                        ->orderBy('end_date', 'desc')
+                        ->first();
+                @endphp
+                
+                @if($latestPackage)
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                        <div>
+                            <p class="text-sm text-gray-500">Berlaku hingga</p>
+                            <p class="font-bold text-orange-600">{{ $latestPackage->end_date->format('d M Y') }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Sisa waktu</p>
+                            <p class="font-bold text-blue-600">{{ now()->diffInDays($latestPackage->end_date) }} hari</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Akses penuh</p>
+                            <p class="font-bold text-green-600">{{ $latestPackage->lessonPackage->duration_in_days }} hari</p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+        @endif
         @endif
 
         <!-- Action Buttons -->
