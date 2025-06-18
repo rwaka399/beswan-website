@@ -31,7 +31,7 @@ class DatabaseSeeder extends Seeder
             RoleMenuSeeder::class,
             RolePermissionSeeder::class,
             LessonPackageSeeder::class,
-            AttendanceSeeder::class,
+            // AttendanceSeeder::class,
         ]);
         
         // Re-enable foreign key checks

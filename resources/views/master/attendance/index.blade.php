@@ -53,8 +53,8 @@
                         <tr class="hover:bg-gray-50 transition-colors duration-200">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $attendances->firstItem() + $index }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $attendance->attendance_date->format('d/m/Y') }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ Carbon\Carbon::parse($attendance->open_time)->format('H:i') }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ Carbon\Carbon::parse($attendance->close_time)->format('H:i') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ \Carbon\Carbon::createFromFormat('H:i:s', $attendance->open_time)->format('H:i') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ \Carbon\Carbon::createFromFormat('H:i:s', $attendance->close_time)->format('H:i') }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($attendance->status === 'open')
                                     <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Terbuka</span>

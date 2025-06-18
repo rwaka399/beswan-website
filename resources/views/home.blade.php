@@ -1178,11 +1178,18 @@
     <script>
         // Alamat BESWAN Course
         const beswanAddress = "Jl. Mojo No.105, Tertek, Kec. Pare, Kabupaten Kediri, Jawa Timur 64215";
+        
+        // Koordinat BESWAN Course  
+        const beswanLocation = {
+            lat: -7.7679,  // Koordinat latitude Pare, Kediri
+            lng: 112.1985, // Koordinat longitude Pare, Kediri
+            address: beswanAddress
+        };
 
         // Fungsi untuk menyalin alamat
         function copyAddress() {
             navigator.clipboard.writeText(beswanAddress).then(function() {
-                alert('✅ Alamat berhasil disalin!');
+                showNotification('Alamat berhasil disalin ke clipboard!', 'success');
             }).catch(function() {
                 // Fallback untuk browser lama
                 const textArea = document.createElement('textarea');
@@ -1191,18 +1198,7 @@
                 textArea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textArea);
-                alert('✅ Alamat berhasil disalin!');
-            });
-        }
-    </script>
-
-        // Fungsi untuk menyalin alamat
-        function copyAddress() {
-            navigator.clipboard.writeText(beswanLocation.address).then(function() {
-                // Buat notifikasi
-                showNotification('Alamat berhasil disalin ke clipboard!', 'success');
-            }, function(err) {
-                showNotification('Gagal menyalin alamat. Silakan coba lagi.', 'error');
+                showNotification('Alamat berhasil disalin!', 'success');
             });
         }
 

@@ -5,15 +5,17 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Attendance;
 use App\Models\AttendanceRecord;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class TeacherAttendanceController extends Controller
 {
     // Menampilkan halaman attendance untuk guru
     public function index()
     {
-        $user = Auth::user();
+        $user = User::with('roles')->find(Auth::id());
         
         // Validasi apakah user adalah guru
         if (!$user->hasRole('Guru')) {
@@ -22,27 +24,47 @@ class TeacherAttendanceController extends Controller
 
         $today = Carbon::today();
         
-        // Cari attendance hari ini
-        $todayAttendance = Attendance::where('attendance_date', $today)
-            ->where('status', 'open')
-            ->first();
+        // Cari attendance hari ini atau kemarin yang masih aktif (untuk kasus melewati tengah malam)
+        $todayAttendance = Attendance::where(function($query) use ($today) {
+            // Attendance hari ini
+            $query->where('attendance_date', $today)
+                  // Atau attendance kemarin yang melewati tengah malam dan masih aktif
+                  ->orWhere(function($subQuery) use ($today) {
+                      $subQuery->where('attendance_date', $today->copy()->subDay())
+                               ->whereRaw('TIME(close_time) < TIME(open_time)'); // Melewati tengah malam
+                  });
+        })->first();
 
         $attendanceRecord = null;
         $canCheckIn = false;
 
         if ($todayAttendance) {
-            // Auto close jika sudah expired
-            $todayAttendance->autoCloseIfExpired();
+            // Debug info untuk troubleshooting
+            Log::info('Teacher attendance debug:', $todayAttendance->getDebugInfo());
             
             // Cari record attendance guru hari ini
             $attendanceRecord = AttendanceRecord::where('attendance_id', $todayAttendance->id)
                 ->where('user_id', $user->user_id)
                 ->first();
 
-            // Cek apakah guru masih bisa check in
-            $canCheckIn = $todayAttendance->isAvailableForTeachers() && 
-                         $todayAttendance->status === 'open' &&
-                         (!$attendanceRecord || !$attendanceRecord->check_in_time);
+            // Cek apakah guru masih bisa check in (SEBELUM auto close)
+            $isAvailable = $todayAttendance->isAvailableForTeachers();
+            $statusOpen = $todayAttendance->status === 'open';
+            $hasNotCheckedIn = (!$attendanceRecord || !$attendanceRecord->check_in_time);
+            
+            $canCheckIn = $isAvailable && $statusOpen && $hasNotCheckedIn;
+            
+            Log::info('Check-in availability:', [
+                'isAvailable' => $isAvailable,
+                'statusOpen' => $statusOpen,
+                'hasNotCheckedIn' => $hasNotCheckedIn,
+                'canCheckIn' => $canCheckIn,
+                'record_exists' => $attendanceRecord ? true : false,
+                'check_in_time' => $attendanceRecord ? $attendanceRecord->check_in_time : null
+            ]);
+            
+            // Auto close jika sudah expired (SETELAH cek availability)
+            $todayAttendance->autoCloseIfExpired();
         }
 
         // Ambil history attendance guru (7 hari terakhir)
@@ -66,7 +88,7 @@ class TeacherAttendanceController extends Controller
     // Melakukan check in attendance
     public function checkIn(Request $request)
     {
-        $user = Auth::user();
+        $user = User::with('roles')->find(Auth::id());
         
         // Validasi apakah user adalah guru
         if (!$user->hasRole('Guru')) {
@@ -76,22 +98,35 @@ class TeacherAttendanceController extends Controller
 
         $today = Carbon::today();
         
-        // Cari attendance hari ini
-        $todayAttendance = Attendance::where('attendance_date', $today)
-            ->where('status', 'open')
-            ->first();
+        // Cari attendance hari ini atau kemarin yang masih aktif (untuk kasus melewati tengah malam)
+        $todayAttendance = Attendance::where(function($query) use ($today) {
+            // Attendance hari ini
+            $query->where('attendance_date', $today)
+                  // Atau attendance kemarin yang melewati tengah malam dan masih aktif
+                  ->orWhere(function($subQuery) use ($today) {
+                      $subQuery->where('attendance_date', $today->copy()->subDay())
+                               ->whereRaw('TIME(close_time) < TIME(open_time)'); // Melewati tengah malam
+                  });
+        })->first();
 
         if (!$todayAttendance) {
             return redirect()->back()
-                ->with('error', 'Tidak ada attendance yang dibuka untuk hari ini.');
+                ->with('error', 'Tidak ada attendance yang dibuat untuk hari ini.');
         }
 
-        // Auto close jika sudah expired
-        $todayAttendance->autoCloseIfExpired();
+        // Debug info untuk troubleshooting
+        Log::info('Check-in attempt debug:', $todayAttendance->getDebugInfo());
+
+        // Cek availability SEBELUM melakukan apapun
+        $isAvailable = $todayAttendance->isAvailableForTeachers();
+        $statusOpen = $todayAttendance->status === 'open';
         
-        if (!$todayAttendance->isAvailableForTeachers() || $todayAttendance->status !== 'open') {
-            return redirect()->back()
-                ->with('error', 'Waktu attendance sudah berakhir atau attendance sudah ditutup.');
+        if (!$isAvailable) {
+            return redirect()->back()->with('error', 'Waktu attendance sudah berakhir (lebih dari 5 jam dari open time).');
+        }
+        
+        if (!$statusOpen) {
+            return redirect()->back()->with('error', 'Attendance sudah ditutup oleh admin.');
         }
 
         // Cari record attendance guru
@@ -139,7 +174,7 @@ class TeacherAttendanceController extends Controller
     // Menampilkan history attendance guru
     public function history()
     {
-        $user = Auth::user();
+        $user = User::with('roles')->find(Auth::id());
         
         // Validasi akses - temporary skip, akan dihandle di route middleware
         // if (!$user->canAccessMaster()) {

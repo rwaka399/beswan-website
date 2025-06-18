@@ -36,11 +36,15 @@
                         <tr class="hover:bg-gray-50 transition-colors duration-200">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $attendanceHistory->firstItem() + $index }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $record->attendance->attendance_date->format('d/m/Y') }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ Carbon\Carbon::parse($record->attendance->open_time)->format('H:i') }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ Carbon\Carbon::parse($record->attendance->close_time)->format('H:i') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ \Carbon\Carbon::createFromFormat('H:i:s', $record->attendance->open_time)->format('H:i') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ \Carbon\Carbon::createFromFormat('H:i:s', $record->attendance->close_time)->format('H:i') }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 @if($record->check_in_time)
-                                    {{ Carbon\Carbon::parse($record->check_in_time)->format('H:i:s') }}
+                                @if($record->check_in_time)
+                                    {{ \Carbon\Carbon::createFromFormat('H:i:s', $record->check_in_time)->format('H:i:s') }}
+                                @else
+                                    -
+                                @endif
                                 @else
                                     <span class="text-gray-400">-</span>
                                 @endif

@@ -99,7 +99,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Jam Buka</p>
-                        <p class="text-xl font-semibold text-gray-900">{{ Carbon\Carbon::parse($attendance->open_time)->format('H:i') }}</p>
+                        <p class="text-xl font-semibold text-gray-900">{{ \Carbon\Carbon::createFromFormat('H:i:s', $attendance->open_time)->format('H:i') }}</p>
                     </div>
                 </div>
             </div>
@@ -114,7 +114,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Jam Tutup</p>
-                        <p class="text-xl font-semibold text-gray-900">{{ Carbon\Carbon::parse($attendance->close_time)->format('H:i') }}</p>
+                        <p class="text-xl font-semibold text-gray-900">{{ \Carbon\Carbon::createFromFormat('H:i:s', $attendance->close_time)->format('H:i') }}</p>
                     </div>
                 </div>
             </div>
@@ -214,7 +214,11 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $record->user->user_email }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     @if($record->check_in_time)
-                                        {{ Carbon\Carbon::parse($record->check_in_time)->format('H:i:s') }}
+                                    @if($record->check_in_time)
+                                        {{ \Carbon\Carbon::createFromFormat('H:i:s', $record->check_in_time)->format('H:i:s') }}
+                                    @else
+                                        -
+                                    @endif
                                     @else
                                         <span class="text-gray-400">-</span>
                                     @endif

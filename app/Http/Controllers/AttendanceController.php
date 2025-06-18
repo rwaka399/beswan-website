@@ -57,9 +57,6 @@ class AttendanceController extends Controller
         // Buat record untuk semua guru aktif dengan status absent
         $teachers = User::whereHas('userRoles.role', function($query) {
             $query->where('role_name', 'Guru');
-        })->whereHas('userRoles', function($query) {
-            // Pastikan relasi user_role masih aktif
-            $query->whereNull('deleted_at');
         })->get();
 
         foreach ($teachers as $teacher) {
@@ -80,12 +77,15 @@ class AttendanceController extends Controller
     public function show(Attendance $attendance)
     {
         $attendance->load(['attendanceRecords.user']);
-        $attendance->autoCloseIfExpired();
+        
+        // Auto close jika expired, tapi jangan override manual close/open oleh admin
+        $wasAutoClosed = $attendance->autoCloseIfExpired();
         
         $presentCount = $attendance->attendanceRecords->where('status', 'present')->count();
+        $lateCount = $attendance->attendanceRecords->where('status', 'late')->count();
         $absentCount = $attendance->attendanceRecords->where('status', 'absent')->count();
 
-        return view('master.attendance.show', compact('attendance', 'presentCount', 'absentCount'));
+        return view('master.attendance.show', compact('attendance', 'presentCount', 'lateCount', 'absentCount', 'wasAutoClosed'));
     }
 
     // Menutup attendance secara manual
@@ -100,14 +100,84 @@ class AttendanceController extends Controller
     // Membuka kembali attendance
     public function reopen(Attendance $attendance)
     {
-        // Cek apakah masih dalam batas waktu 5 jam
-        if (!$attendance->isExpired()) {
+        // Admin bisa membuka kembali attendance kapan saja, 
+        // tapi beri peringatan jika sudah melewati 5 jam
+        if ($attendance->isExpired()) {
+            $attendance->update(['status' => 'open']);
+            return redirect()->back()
+                ->with('warning', 'Attendance berhasil dibuka kembali. Perhatian: Waktu 5 jam sudah terlewati, tapi attendance tetap dibuka atas keputusan admin.');
+        } else {
             $attendance->update(['status' => 'open']);
             return redirect()->back()
                 ->with('success', 'Attendance berhasil dibuka kembali.');
         }
+    }
 
-        return redirect()->back()
-            ->with('error', 'Attendance sudah melewati batas waktu 5 jam dan tidak dapat dibuka kembali.');
+    // Debug method untuk troubleshooting (hapus di production)
+    public function debug(Attendance $attendance)
+    {
+        $debugInfo = $attendance->getDebugInfo();
+        
+        return response()->json([
+            'attendance_info' => $debugInfo,
+            'teachers_can_checkin' => $attendance->isAvailableForTeachers() && $attendance->status === 'open'
+        ]);
+    }
+
+    // Method testing untuk skenario melewati tengah malam (hapus di production)
+    public function testMidnightScenario()
+    {
+        $scenarios = [
+            [
+                'name' => 'Normal Day Attendance (9 AM - 2 PM)',
+                'open_time' => '09:00:00',
+                'close_time' => '14:00:00',
+                'test_times' => ['08:30', '09:30', '13:30', '14:30']
+            ],
+            [
+                'name' => 'Night Attendance (9 PM - 2 AM)',
+                'open_time' => '21:00:00', 
+                'close_time' => '02:00:00',
+                'test_times' => ['20:30', '21:30', '23:30', '01:30', '02:30']
+            ],
+            [
+                'name' => 'Late Night Attendance (11 PM - 4 AM)',
+                'open_time' => '23:00:00',
+                'close_time' => '04:00:00', 
+                'test_times' => ['22:30', '23:30', '01:30', '03:30', '04:30']
+            ]
+        ];
+
+        $results = [];
+        $testDate = Carbon::today();
+        
+        foreach ($scenarios as $scenario) {
+            $results[$scenario['name']] = [];
+            
+            // Simulasi attendance
+            $attendance = new Attendance([
+                'attendance_date' => $testDate,
+                'open_time' => $scenario['open_time'],
+                'close_time' => $scenario['close_time'],
+                'status' => 'open'
+            ]);
+            
+            foreach ($scenario['test_times'] as $testTime) {
+                // Set waktu test
+                Carbon::setTestNow($testDate->copy()->setTimeFromTimeString($testTime));
+                
+                $results[$scenario['name']][$testTime] = [
+                    'current_time' => Carbon::now()->format('Y-m-d H:i:s'),
+                    'is_available' => $attendance->isAvailableForTeachers(),
+                    'is_expired' => $attendance->isExpired(),
+                    'debug_info' => $attendance->getDebugInfo()
+                ];
+            }
+        }
+        
+        // Reset waktu
+        Carbon::setTestNow();
+        
+        return response()->json($results, 200, [], JSON_PRETTY_PRINT);
     }
 }

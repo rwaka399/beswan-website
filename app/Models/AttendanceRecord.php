@@ -19,7 +19,7 @@ class AttendanceRecord extends Model
     ];
 
     protected $casts = [
-        'check_in_time' => 'datetime:H:i:s',
+        // Remove the datetime cast for check_in_time since it's stored as TIME
     ];
 
     public function attendance()
@@ -44,18 +44,24 @@ class AttendanceRecord extends Model
             return;
         }
 
-        // Untuk saat ini, semua yang check-in dianggap present
-        // Bisa ditambahkan logika untuk late berdasarkan open_time
-        $this->status = 'present';
+        // Parse waktu check-in dan open_time
+        $openDateTime = Carbon::createFromFormat(
+            'Y-m-d H:i:s',
+            $this->attendance->attendance_date->format('Y-m-d') . ' ' . $this->attendance->open_time
+        );
         
-        // Optional: Implementasi logika terlambat
-        // $openTime = Carbon::parse($this->attendance->attendance_date->format('Y-m-d') . ' ' . $this->attendance->open_time);
-        // $checkInTime = Carbon::parse($this->attendance->attendance_date->format('Y-m-d') . ' ' . $this->check_in_time);
-        // 
-        // if ($checkInTime->diffInMinutes($openTime) > 15) { // 15 menit toleransi
-        //     $this->status = 'late';
-        // } else {
-        //     $this->status = 'present';
-        // }
+        $checkInDateTime = Carbon::createFromFormat(
+            'Y-m-d H:i:s',
+            $this->attendance->attendance_date->format('Y-m-d') . ' ' . $this->check_in_time
+        );
+        
+        // Toleransi terlambat: 15 menit setelah open_time
+        $lateThreshold = $openDateTime->copy()->addMinutes(15);
+        
+        if ($checkInDateTime->greaterThan($lateThreshold)) {
+            $this->status = 'late';
+        } else {
+            $this->status = 'present';
+        }
     }
 }

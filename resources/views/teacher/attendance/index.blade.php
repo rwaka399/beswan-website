@@ -33,7 +33,7 @@
                                     </div>
                                     <div class="ml-4">
                                         <p class="text-sm font-medium text-blue-600">Jam Buka</p>
-                                        <p class="text-xl font-semibold text-blue-900">{{ Carbon\Carbon::parse($todayAttendance->open_time)->format('H:i') }}</p>
+                                        <p class="text-xl font-semibold text-blue-900">{{ \Carbon\Carbon::createFromFormat('H:i:s', $todayAttendance->open_time)->format('H:i') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -46,7 +46,7 @@
                                     </div>
                                     <div class="ml-4">
                                         <p class="text-sm font-medium text-red-600">Tutup</p>
-                                        <p class="text-xl font-semibold text-red-900">{{ Carbon\Carbon::parse($todayAttendance->close_time)->format('H:i') }}</p>
+                                        <p class="text-xl font-semibold text-red-900">{{ \Carbon\Carbon::createFromFormat('H:i:s', $todayAttendance->close_time)->format('H:i') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -78,7 +78,13 @@
                                     <div>
                                         <h5 class="text-sm font-semibold text-{{ $attendanceRecord->check_in_time ? 'green' : 'blue' }}-800 mb-2">Status Attendance Anda:</h5>
                                         @if($attendanceRecord->check_in_time)
-                                            <p class="text-sm text-{{ $attendanceRecord->check_in_time ? 'green' : 'blue' }}-700 mb-1"><strong>Check In:</strong> {{ Carbon\Carbon::parse($attendanceRecord->check_in_time)->format('H:i:s') }}</p>
+                                            <p class="text-sm text-{{ $attendanceRecord->check_in_time ? 'green' : 'blue' }}-700 mb-1"><strong>Check In:</strong> 
+                                                @if($attendanceRecord->check_in_time)
+                                                    {{ \Carbon\Carbon::createFromFormat('H:i:s', $attendanceRecord->check_in_time)->format('H:i:s') }}
+                                                @else
+                                                    Belum check in
+                                                @endif
+                                            </p>
                                             <p class="text-sm text-{{ $attendanceRecord->check_in_time ? 'green' : 'blue' }}-700 mb-1"><strong>Status:</strong> 
                                                 @switch($attendanceRecord->status)
                                                     @case('present')
@@ -200,7 +206,11 @@
                                     <div>
                                         <div class="font-semibold text-gray-900">{{ $record->attendance->attendance_date->format('d/m') }}</div>
                                         @if($record->check_in_time)
-                                            <div class="text-sm text-gray-500">{{ Carbon\Carbon::parse($record->check_in_time)->format('H:i') }}</div>
+                                            @if($record->check_in_time)
+                                                <div class="text-sm text-gray-500">{{ \Carbon\Carbon::createFromFormat('H:i:s', $record->check_in_time)->format('H:i') }}</div>
+                                            @else
+                                                <div class="text-sm text-gray-400">Belum check in</div>
+                                            @endif
                                         @endif
                                     </div>
                                     <div>
