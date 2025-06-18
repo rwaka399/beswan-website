@@ -44,7 +44,6 @@ class IconHelper
             '/master/financial/create' => 'financial-create',
             '/master/financial/report' => 'financial-report',
             '/master/financial/dashboard' => 'financial-dashboard',
-            '/master/settings' => 'settings',
             '/master/attendance' => 'master.attendance.index',
             '/master/attendance/create' => 'master.attendance.create',
             '/guru/attendance' => 'teacher.attendance.index',

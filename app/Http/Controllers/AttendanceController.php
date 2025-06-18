@@ -49,25 +49,31 @@ class AttendanceController extends Controller
             'open_time' => $openTime->format('H:i:s'),
             'close_time' => $closeTime->format('H:i:s'),
             'description' => $request->description,
+            'status' => 'open', // Explicit set status
             'created_by' => Auth::user()->user_id,
             'updated_by' => Auth::user()->user_id,
         ]);
 
-        // Buat record untuk semua guru dengan status absent
+        // Buat record untuk semua guru aktif dengan status absent
         $teachers = User::whereHas('userRoles.role', function($query) {
             $query->where('role_name', 'Guru');
+        })->whereHas('userRoles', function($query) {
+            // Pastikan relasi user_role masih aktif
+            $query->whereNull('deleted_at');
         })->get();
 
         foreach ($teachers as $teacher) {
             AttendanceRecord::create([
                 'attendance_id' => $attendance->id,
                 'user_id' => $teacher->user_id,
-                'status' => 'absent'
+                'status' => 'absent',
+                'check_in_time' => null,
+                'notes' => null
             ]);
         }
 
         return redirect()->route('master.attendance.index')
-            ->with('success', 'Attendance berhasil dibuat! Guru dapat melakukan absensi dalam 5 jam ke depan.');
+            ->with('success', 'Attendance berhasil dibuat! ' . $teachers->count() . ' guru dapat melakukan absensi dalam 5 jam ke depan.');
     }
 
     // Menampilkan detail attendance

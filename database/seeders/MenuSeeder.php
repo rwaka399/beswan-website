@@ -162,18 +162,6 @@ class MenuSeeder extends Seeder
             'updated_by' => $user->user_id,
         ]);
 
-        Menu::create([
-            'menu_name' => 'Settings',
-            'menu_type' => 'main',
-            'menu_icon' => 'fas fa-cog',
-            'menu_link' => '/master/settings',
-            'menu_urutan' => 7,
-            'menu_parent' => null,
-            'menu_slug' => 'settings',
-            'created_by' => $user->user_id,
-            'updated_by' => $user->user_id,
-        ]);
-
         $attendance = Menu::create([
             'menu_name' => 'Attendance',
             'menu_type' => 'parent',

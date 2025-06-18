@@ -78,6 +78,7 @@ class TransactionController extends Controller
             'payment_method' => 'required|in:' . implode(',', $allowedPaymentMethods),
             'scheduled_start_date' => 'required|date|after_or_equal:today',
             'schedule_notes' => 'nullable|string|max:255',
+            'payment_gateway' => 'required|in:xendit,midtrans',
         ]);
 
         try {
@@ -113,6 +114,7 @@ class TransactionController extends Controller
                 'failure_redirect_url' => url('/transaction/failed'),
                 'currency' => 'IDR',
                 'payment_methods' => [$request->payment_method],
+                'payment_gateway' => $request->payment_gateway,
             ];
 
             Log::info('Params prepared for invoice: ' . json_encode($params));
@@ -135,6 +137,7 @@ class TransactionController extends Controller
                 'description' => $params['description'],
                 'status' => $result->getStatus(),
                 'payment_method' => $request->payment_method,
+                'payment_gateway' => $request->payment_gateway,
                 'invoice_url' => $result->getInvoiceUrl(),
                 'expires_at' => Carbon::parse($result->getExpiryDate()),
             ];

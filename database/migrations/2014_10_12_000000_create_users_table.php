@@ -15,10 +15,12 @@ return new class extends Migration
             $table->id('user_id');
             $table->string('name');
             $table->string('email')->unique();
-            $table->boolean('is_premium')->default(false);
-            $table->timestamp('premium_until')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('provider')->nullable();
+            $table->string('provider_id')->nullable();
+            $table->boolean('is_premium')->default(false);
+            $table->timestamp('premium_until')->nullable();
             $table->string('phone_number');
             $table->string('province')->nullable();
             $table->string('city')->nullable();

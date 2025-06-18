@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class UserSeeder extends Seeder
 {
@@ -14,44 +15,43 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::updateOrCreate(
-            ['email' => 'raka.test@gmail.com'],
+        // Simple creation with check for existing users
+        $users = [
             [
-                'name'          => 'Admin',
-                'password'      => Hash::make('Raka1234'),
-                'phone_number'  => '08123456789',
-                'address'       => 'jl.rambutan'
-            ]
-        );
-        
-        User::updateOrCreate(
-            ['email' => 'guru.test@gmail.com'],
+                'name' => 'Admin',
+                'email' => 'raka.test@gmail.com',
+                'password' => Hash::make('Raka1234'),
+                'phone_number' => '08123456789',
+                'address' => 'jl.rambutan',
+            ],
             [
-                'name'          => 'Guru',
-                'password'      => Hash::make('Guru1234'),
-                'phone_number'  => '08123456789',
-                'address'       => 'jl.mangga'
-            ]
-        );
-        
-        User::updateOrCreate(
-            ['email' => 'user.test@gmail.com'],
+                'name' => 'Guru',
+                'email' => 'guru.test@gmail.com',
+                'password' => Hash::make('Guru1234'),
+                'phone_number' => '08123456789',
+                'address' => 'jl.mangga',
+            ],
             [
-                'name'          => 'User',
-                'password'      => Hash::make('User1234'),   
-                'phone_number'  => '08123456789',
-                'address'       => 'jl.durian'
-            ]
-        );
-        
-        User::updateOrCreate(
-            ['email' => 'siti.test@gmail.com'],
+                'name' => 'User',
+                'email' => 'user.test@gmail.com',
+                'password' => Hash::make('User1234'),
+                'phone_number' => '08123456789',
+                'address' => 'jl.durian',
+            ],
             [
-                'name'          => 'Siti Mujaer',
-                'password'      => Hash::make('Siti1234'),   
-                'phone_number'  => '08123456789',
-                'address'       => 'jl.durian'
-            ]
-        );
+                'name' => 'Siti Mujaer',
+                'email' => 'siti.test@gmail.com',
+                'password' => Hash::make('Siti1234'),
+                'phone_number' => '08123456789',
+                'address' => 'jl.durian',
+            ],
+        ];
+
+        foreach ($users as $userData) {
+            User::firstOrCreate(
+                ['email' => $userData['email']],
+                $userData
+            );
+        }
     }
 }

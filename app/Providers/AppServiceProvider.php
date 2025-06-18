@@ -25,6 +25,11 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useTailwind();
         
+        // Force HTTPS in production
+        if (config('app.env') === 'production') {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+        
         // Custom Blade directives for session-based auth data
         Blade::directive('hasPermission', function ($expression) {
             return "<?php if(Auth::guard('web') instanceof \App\Guards\CustomSessionGuard && Auth::guard('web')->hasPermission($expression)): ?>";

@@ -32,7 +32,7 @@ class LessonPackageController extends Controller
 
         $lessonPackages = $query->paginate(10)->appends(['search' => $request->search]);
 
-        return view('lesson_package.index', compact('lessonPackages'));
+        return view('master.lesson_package.index', compact('lessonPackages'));
     }
 
     /**
@@ -40,7 +40,7 @@ class LessonPackageController extends Controller
      */
     public function create()
     {
-        return view('lesson_package.create');
+        return view('master.lesson_package.create');
     }
 
     /**
@@ -81,7 +81,7 @@ class LessonPackageController extends Controller
     public function edit($id)
     {
         $lessonPackage = LessonPackage::findOrFail($id);
-        return view('lesson_package.edit', compact('lessonPackage'));
+        return view('master.lesson_package.edit', compact('lessonPackage'));
     }
 
     /**

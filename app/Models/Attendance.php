@@ -47,15 +47,23 @@ class Attendance extends Model
     // Check apakah attendance masih bisa diakses guru (sama dengan close_time)
     public function isAvailableForTeachers()
     {
-        $now = Carbon::now()->format('H:i:s');
-        return $this->status === 'open' && $now <= $this->close_time;
+        if ($this->status !== 'open') {
+            return false;
+        }
+
+        $attendanceDateTime = Carbon::parse($this->attendance_date->format('Y-m-d') . ' ' . $this->close_time);
+        $now = Carbon::now();
+        
+        return $now <= $attendanceDateTime;
     }
 
     // Check apakah attendance sudah expired untuk admin
     public function isExpired()
     {
-        $now = Carbon::now()->format('H:i:s');
-        return $now > $this->close_time;
+        $attendanceDateTime = Carbon::parse($this->attendance_date->format('Y-m-d') . ' ' . $this->close_time);
+        $now = Carbon::now();
+        
+        return $now > $attendanceDateTime;
     }
 
     // Auto close attendance jika sudah melewati close_time

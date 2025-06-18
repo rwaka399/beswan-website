@@ -7,6 +7,7 @@ use App\Models\Menu;
 use App\Models\RoleMenu;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class RoleMenuSeeder extends Seeder
 {
@@ -18,7 +19,9 @@ class RoleMenuSeeder extends Seeder
         $admin = User::first();
         
         // Clear existing role menu assignments to prevent duplicates
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         RoleMenu::truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         
         // Get roles
         $adminRole = Role::where('role_name', 'Admin')->first();
@@ -30,7 +33,6 @@ class RoleMenuSeeder extends Seeder
         $menuMaster = Menu::where('menu_slug', 'menu')->first();
         $kelasMenu = Menu::where('menu_slug', 'lesson_package')->first();
         $keuanganMenu = Menu::where('menu_slug', 'keuangan')->first();
-        $settingMenu = Menu::where('menu_slug', 'settings')->first();
         $attendanceMenu = Menu::where('menu_slug', 'attendance')->first();
         $profileMenu = Menu::where('menu_slug', 'profile')->first();
         $historyMenu = Menu::where('menu_slug', 'history_transaksi')->first();
@@ -58,7 +60,6 @@ class RoleMenuSeeder extends Seeder
                 $menuMaster,
                 $kelasMenu,
                 $keuanganMenu,
-                $settingMenu,
                 $attendanceMenu,
                 $profileMenu,  // Admin bisa akses profile
                 $homeMenu,

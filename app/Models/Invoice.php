@@ -10,6 +10,7 @@ class Invoice extends Model
 
     protected $fillable = [
         'external_id',
+        'invoice_url',
         'xendit_invoice_id',
         'user_id',
         'lesson_package_id',
@@ -18,8 +19,13 @@ class Invoice extends Model
         'status',
         'description',
         'payment_method',
-        'invoice_url',
         'expires_at',
+        'midtrans_transaction_id',
+        'midtrans_order_id',
+        'midtrans_payment_code',
+        'midtrans_transaction_status',
+        'midtrans_response',
+        'payment_gateway',
     ];
 
     protected $casts = [

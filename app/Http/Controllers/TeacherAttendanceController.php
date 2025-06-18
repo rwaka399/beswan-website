@@ -14,6 +14,12 @@ class TeacherAttendanceController extends Controller
     public function index()
     {
         $user = Auth::user();
+        
+        // Validasi apakah user adalah guru
+        if (!$user->hasRole('Guru')) {
+            abort(403, 'Akses ditolak. Hanya guru yang dapat mengakses halaman ini.');
+        }
+
         $today = Carbon::today();
         
         // Cari attendance hari ini
@@ -25,6 +31,9 @@ class TeacherAttendanceController extends Controller
         $canCheckIn = false;
 
         if ($todayAttendance) {
+            // Auto close jika sudah expired
+            $todayAttendance->autoCloseIfExpired();
+            
             // Cari record attendance guru hari ini
             $attendanceRecord = AttendanceRecord::where('attendance_id', $todayAttendance->id)
                 ->where('user_id', $user->user_id)
@@ -32,6 +41,7 @@ class TeacherAttendanceController extends Controller
 
             // Cek apakah guru masih bisa check in
             $canCheckIn = $todayAttendance->isAvailableForTeachers() && 
+                         $todayAttendance->status === 'open' &&
                          (!$attendanceRecord || !$attendanceRecord->check_in_time);
         }
 
@@ -42,6 +52,7 @@ class TeacherAttendanceController extends Controller
                 $query->where('attendance_date', '>=', Carbon::now()->subDays(7));
             })
             ->orderBy('created_at', 'desc')
+            ->take(5) // Limit to 5 most recent
             ->get();
 
         return view('teacher.attendance.index', compact(
@@ -56,6 +67,13 @@ class TeacherAttendanceController extends Controller
     public function checkIn(Request $request)
     {
         $user = Auth::user();
+        
+        // Validasi apakah user adalah guru
+        if (!$user->hasRole('Guru')) {
+            return redirect()->back()
+                ->with('error', 'Akses ditolak. Hanya guru yang dapat melakukan check-in.');
+        }
+
         $today = Carbon::today();
         
         // Cari attendance hari ini
@@ -68,9 +86,12 @@ class TeacherAttendanceController extends Controller
                 ->with('error', 'Tidak ada attendance yang dibuka untuk hari ini.');
         }
 
-        if (!$todayAttendance->isAvailableForTeachers()) {
+        // Auto close jika sudah expired
+        $todayAttendance->autoCloseIfExpired();
+        
+        if (!$todayAttendance->isAvailableForTeachers() || $todayAttendance->status !== 'open') {
             return redirect()->back()
-                ->with('error', 'Waktu attendance sudah berakhir (5 jam). Anda dianggap tidak hadir.');
+                ->with('error', 'Waktu attendance sudah berakhir atau attendance sudah ditutup.');
         }
 
         // Cari record attendance guru
@@ -80,32 +101,35 @@ class TeacherAttendanceController extends Controller
 
         if (!$attendanceRecord) {
             return redirect()->back()
-                ->with('error', 'Record attendance tidak ditemukan.');
+                ->with('error', 'Record attendance tidak ditemukan. Silakan hubungi administrator.');
         }
 
         if ($attendanceRecord->check_in_time) {
             return redirect()->back()
-                ->with('error', 'Anda sudah melakukan check in hari ini.');
+                ->with('error', 'Anda sudah melakukan check in hari ini pada ' . Carbon::parse($attendanceRecord->check_in_time)->format('H:i:s') . '.');
         }
 
         // Update record dengan waktu check in
-        $currentTime = Carbon::now()->format('H:i:s');
+        $currentTime = Carbon::now();
         $attendanceRecord->update([
-            'check_in_time' => $currentTime,
-            'notes' => $request->notes
+            'check_in_time' => $currentTime->format('H:i:s'),
+            'notes' => $request->notes ?? null
         ]);
 
         // Set status berdasarkan waktu
         $attendanceRecord->setStatusBasedOnTime();
         $attendanceRecord->save();
 
-        $statusMessage = '';
+        $statusMessage = 'Check in berhasil pada ' . $currentTime->format('H:i:s') . '! ';
         switch ($attendanceRecord->status) {
             case 'present':
-                $statusMessage = 'Check in berhasil! Anda hadir.';
+                $statusMessage .= 'Status: Hadir.';
+                break;
+            case 'late':
+                $statusMessage .= 'Status: Terlambat.';
                 break;
             default:
-                $statusMessage = 'Check in berhasil!';
+                $statusMessage .= 'Status: ' . ucfirst($attendanceRecord->status) . '.';
                 break;
         }
 
@@ -117,7 +141,14 @@ class TeacherAttendanceController extends Controller
     {
         $user = Auth::user();
         
-        $attendanceHistory = AttendanceRecord::with('attendance')
+        // Validasi akses - temporary skip, akan dihandle di route middleware
+        // if (!$user->canAccessMaster()) {
+        //     abort(403, 'Akses ditolak.');
+        // }
+        
+        $attendanceHistory = AttendanceRecord::with(['attendance' => function($query) {
+                $query->orderBy('attendance_date', 'desc');
+            }])
             ->where('user_id', $user->user_id)
             ->whereHas('attendance')
             ->orderBy('created_at', 'desc')

@@ -39,10 +39,23 @@ class AttendanceRecord extends Model
 
     public function setStatusBasedOnTime()
     {
-        if (!$this->check_in_time) {
+        if (!$this->check_in_time || !$this->attendance) {
             $this->status = 'absent';
-        } else {
-            $this->status = 'present';
+            return;
         }
+
+        // Untuk saat ini, semua yang check-in dianggap present
+        // Bisa ditambahkan logika untuk late berdasarkan open_time
+        $this->status = 'present';
+        
+        // Optional: Implementasi logika terlambat
+        // $openTime = Carbon::parse($this->attendance->attendance_date->format('Y-m-d') . ' ' . $this->attendance->open_time);
+        // $checkInTime = Carbon::parse($this->attendance->attendance_date->format('Y-m-d') . ' ' . $this->check_in_time);
+        // 
+        // if ($checkInTime->diffInMinutes($openTime) > 15) { // 15 menit toleransi
+        //     $this->status = 'late';
+        // } else {
+        //     $this->status = 'present';
+        // }
     }
 }

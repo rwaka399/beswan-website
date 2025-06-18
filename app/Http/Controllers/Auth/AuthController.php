@@ -14,83 +14,49 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
-    public function login()
+    public function showLoginForm()
     {
         return view('auth.login');
     }
 
-    public function loginPost(Request $request)
+    public function login(Request $request)
     {
-        // Validasi input
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required|string|min:6',
-        ], [
-            'email.required' => 'The email field is required.',
-            'email.email' => 'Please enter a valid email address.',
-            'password.required' => 'The password field is required.',
-            'password.min' => 'The password must be at least 6 characters.',
+            'password' => 'required',
         ]);
 
-        
+        $credentials = $request->only('email', 'password');
 
-        try {
-
-            $email = strtolower($request->email);
-
-
-            $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
-
-            // Cek user & password cocok
-            if ($user && Hash::check($request->password, $user->password)) {
-                Auth::login($user, $request->has('remember'));
-
-                // Ambil role pertama user
-                $userRole = $user->userRoles()->first();
-
-                if (!$userRole) {
-                    Auth::logout();
-                    return redirect()->route('login')->with('error', 'User does not have a role assigned.');
-                }
-
-                Session::put([
-                    'role_id' => $userRole->role_id,
-                    'user_id' => $user->user_id,
+        if (Auth::attempt($credentials, $request->filled('remember'))) {
+            $request->session()->regenerate();
+            
+            // Check if the guard is our custom guard and has claimed data
+            $guard = Auth::guard('web');
+            if ($guard instanceof \App\Guards\CustomSessionGuard) {
+                $userData = $guard->getUserData();
+                $userRole = $guard->getUserRole();
+                $userMenus = $guard->getUserMenus();
+                $userPermissions = $guard->getUserPermissions();
+                  // You can log or debug the claimed data here
+                Log::info('User logged in with claimed data:', [
+                    'user' => $userData,
+                    'role' => $userRole,
+                    'menus_count' => count($userMenus),
+                    'permissions_count' => count($userPermissions)
                 ]);
-
-                // Redirect based on role
-                $roleName = $user->getRoleName();
-                
-                if ($request->expectsJson()) {
-                    return response()->json([
-                        'message' => 'Login successful!',
-                        'user' => $user,
-                        'role_id' => $userRole->role_id,
-                        'role_name' => $roleName,
-                    ]);
-                }
-
-                // Redirect based on user role
-                if (in_array($roleName, ['Admin', 'Guru'])) {
-                    return redirect()->intended('/master')->with('success', 'Login successful! Welcome to dashboard.');
-                } else {
-                    return redirect()->intended('/')->with('success', 'Login successful! Welcome back.');
-                }
             }
 
-            // Kalau kombinasi user dan password salah
-            return redirect()->route('login')->with('error', 'Invalid email or password.');
-        } catch (\Throwable $e) {
-            Log::error('Login gagal', [
-                'email' => $request->email,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return redirect()->route('login')->with('error', 'Something went wrong. Please try again later.');
+            return redirect()->intended(route('home'))->with('success', 'Login successful!');
         }
+
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
     }
 
     public function register()
@@ -176,10 +142,148 @@ class AuthController extends Controller
         }
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
         Auth::logout();
-        Session::flush();
-        return redirect()->intended('/')->with('success', 'Logout successful! See you next time.');
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        return redirect('/')->with('success', 'Logout successful! See you next time.');
+    }
+
+    // ==================== SSO METHODS ====================
+    
+    public function redirectToProvider($provider)
+    {
+        // Validasi provider yang didukung
+        $supportedProviders = ['google', 'facebook', 'github', 'twitter'];
+        
+        if (!in_array($provider, $supportedProviders)) {
+            Log::error('Unsupported SSO provider', ['provider' => $provider]);
+            return redirect('/login')->with('error', 'Provider SSO tidak didukung.');
+        }
+
+        try {
+            // Check configuration before attempting redirect
+            $config = config("services.{$provider}");
+            if (!$config || !$config['client_id'] || !$config['client_secret']) {
+                Log::error('SSO Configuration missing', [
+                    'provider' => $provider,
+                    'config_exists' => !empty($config),
+                    'client_id_exists' => !empty($config['client_id'] ?? null),
+                    'client_secret_exists' => !empty($config['client_secret'] ?? null),
+                    'redirect_exists' => !empty($config['redirect'] ?? null),
+                ]);
+                
+                return redirect('/login')->with('error', 'Konfigurasi ' . ucfirst($provider) . ' belum lengkap. Silakan hubungi administrator.');
+            }
+
+            Log::info('Redirecting to SSO provider', [
+                'provider' => $provider,
+                'redirect_url' => $config['redirect'] ?? 'not_set',
+            ]);
+            
+            return Socialite::driver($provider)->redirect();
+        } catch (\Exception $e) {
+            Log::error('SSO Redirect failed', [
+                'provider' => $provider,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'config' => config("services.{$provider}", 'not_found')
+            ]);
+            
+            return redirect('/login')->with('error', 'Gagal mengakses ' . ucfirst($provider) . '. Silakan coba lagi atau gunakan login biasa. Error: ' . $e->getMessage());
+        }
+    }
+
+    public function handleProviderCallback($provider)
+    {
+        try {
+            Log::info('Handling SSO callback', ['provider' => $provider]);
+            
+            $socialUser = Socialite::driver($provider)->user();
+            
+            if (!$socialUser || !$socialUser->getEmail()) {
+                Log::error('Invalid social user data', ['provider' => $provider]);
+                return redirect('/login')->with('error', 'Data pengguna dari ' . ucfirst($provider) . ' tidak valid.');
+            }
+            
+            $user = $this->findOrCreateUser($socialUser, $provider);
+            
+            // Login menggunakan CustomSessionGuard yang sudah ada
+            Auth::login($user);
+            
+            Log::info('SSO Login successful', [
+                'user_id' => $user->user_id,
+                'provider' => $provider,
+                'email' => $user->email
+            ]);
+            
+            return redirect()->intended('/')->with('success', 'Selamat datang kembali!');
+            
+        } catch (\Exception $e) {
+            Log::error('SSO Login failed', [
+                'provider' => $provider,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect('/login')->with('error', 'Login dengan ' . ucfirst($provider) . ' gagal. Silakan coba lagi atau gunakan login biasa.');
+        }
+    }
+
+    private function findOrCreateUser($socialUser, $provider)
+    {
+        // Cari user berdasarkan email
+        $user = User::where('email', $socialUser->getEmail())->first();
+        
+        if ($user) {
+            // Update provider info jika user sudah ada
+            $user->update([
+                'provider' => $provider,
+                'provider_id' => $socialUser->getId(),
+                'email_verified_at' => now(), // Auto verify dari SSO
+            ]);
+            
+            return $user;
+        }
+
+        // Buat user baru jika belum ada
+        DB::beginTransaction();
+        
+        try {
+            $user = User::create([
+                'name' => $socialUser->getName(),
+                'email' => $socialUser->getEmail(),
+                'provider' => $provider,
+                'provider_id' => $socialUser->getId(),
+                'email_verified_at' => now(),
+                'password' => bcrypt(str()->random(32)), // Random password
+                'phone_number' => '', // Default empty, bisa diisi nanti
+                'address' => '', // Default empty, bisa diisi nanti
+            ]);
+
+            // Assign role default "User"
+            $defaultRole = Role::where('role_name', 'User')->first();
+            if ($defaultRole) {
+                UserRole::create([
+                    'user_id' => $user->user_id,
+                    'role_id' => $defaultRole->role_id,
+                ]);
+            }
+
+            DB::commit();
+            
+            Log::info('New user created via SSO', [
+                'user_id' => $user->user_id,
+                'provider' => $provider
+            ]);
+            
+            return $user;
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 }

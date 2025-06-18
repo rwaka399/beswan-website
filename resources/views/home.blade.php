@@ -7,6 +7,79 @@
     <title>BESWAN COURSE - Kursus Bahasa Inggris Terbaik</title>
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
+    
+    <!-- Additional Styles for Maps -->
+    <style>
+        /* Custom styles for map responsiveness */
+        .aspect-w-16 {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        }
+        
+        .aspect-w-16 iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Custom animation for map markers */
+        @keyframes pulse-marker {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+        
+        .animate-pulse-marker {
+            animation: pulse-marker 2s infinite;
+        }
+        
+        /* Smooth transitions for buttons */
+        .map-button {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .map-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Custom scrollbar for mobile */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Loading animation */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
 </head>
 
 <body class="font-sans bg-gray-50">
@@ -32,6 +105,109 @@
                         <a href="#paket" class="nav-link text-gray-700 hover:text-blue-600 font-medium transition-colors">Paket</a>
                         <a href="#pengajar" class="nav-link text-gray-700 hover:text-blue-600 font-medium transition-colors">Pengajar</a>
                         <a href="#kontak" class="nav-link text-gray-700 hover:text-blue-600 font-medium transition-colors">Kontak</a>
+                        
+                        @auth
+                            @if(Auth::user()->isAdmin())
+                                <!-- Admin Menu Dropdown -->
+                                <div x-data="{ masterOpen: false }" class="relative">
+                                    <button @click="masterOpen = !masterOpen" 
+                                            class="flex items-center space-x-1 text-gray-700 hover:text-blue-600 font-medium transition-colors">
+                                        <span>Master</span>
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </button>
+                                    
+                                    <!-- Master Dropdown Menu -->
+                                    <div x-show="masterOpen" @click.outside="masterOpen = false" x-transition
+                                         class="absolute top-8 left-0 w-56 bg-white rounded-xl shadow-lg py-2 border border-gray-100 z-50">
+                                        <a href="{{ route('dashboard') }}" 
+                                           class="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4"/>
+                                            </svg>
+                                            Dashboard
+                                        </a>
+                                        
+                                        <a href="{{ route('user-index') }}" 
+                                           class="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                                            </svg>
+                                            Kelola User
+                                        </a>
+                                        <a href="{{ route('role-index') }}" 
+                                           class="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                            </svg>
+                                            Kelola Role
+                                        </a>
+                                        <a href="{{ route('menu-index') }}" 
+                                           class="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
+                                            </svg>
+                                            Kelola Menu
+                                        </a>
+                                        
+                                        <a href="{{ route('lesson-package-index') }}" 
+                                           class="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                            </svg>
+                                            Paket Pelajaran
+                                        </a>
+                                        
+                                        <a href="{{ route('financial-index') }}" 
+                                           class="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                                            </svg>
+                                            Keuangan
+                                        </a>
+                                        
+                                        <a href="{{ route('master.attendance.index') }}" 
+                                           class="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012-2m-6 9l2 2 4-4"/>
+                                            </svg>
+                                            Absensi Master
+                                        </a>
+                                    </div>
+                                </div>
+                            @elseif(Auth::user()->hasRole('Guru'))
+                                <!-- Guru Menu Dropdown -->
+                                <div x-data="{ guruOpen: false }" class="relative">
+                                    <button @click="guruOpen = !guruOpen" 
+                                            class="flex items-center space-x-1 text-gray-700 hover:text-blue-600 font-medium transition-colors">
+                                        <span>Guru</span>
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </button>
+                                    
+                                    <!-- Guru Dropdown Menu -->
+                                    <div x-show="guruOpen" @click.outside="guruOpen = false" x-transition
+                                         class="absolute top-8 left-0 w-48 bg-white rounded-xl shadow-lg py-2 border border-gray-100 z-50">
+                                        <a href="{{ route('teacher.attendance.index') }}" 
+                                           class="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012-2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                            </svg>
+                                            Absensi Saya
+                                        </a>
+                                        <a href="{{ route('teacher.attendance.history') }}" 
+                                           class="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            Riwayat Absensi
+                                        </a>
+                                    </div>
+                                </div>
+                            @endif
+                        @endauth
                     </div>
                 </div>
 
@@ -59,7 +235,7 @@
                             
                             <!-- Profile Dropdown -->
                             <button @click="open = !open" class="hidden md:flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors">
-                                <img src="{{ Auth::user()->profile_picture ?? '/storage/default-avatar.png' }}" 
+                                <img src="{{ Auth::user()->profile_picture ?? '/storage/profile.png' }}" 
                                      alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-gray-200">
                                 <span class="hidden lg:block font-medium">{{ Auth::user()->name }}</span>
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -112,6 +288,83 @@
                 <a href="#paket" class="nav-link block px-3 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors" @click="mobileMenuOpen = false">Paket</a>
                 <a href="#pengajar" class="nav-link block px-3 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors" @click="mobileMenuOpen = false">Pengajar</a>
                 <a href="#kontak" class="nav-link block px-3 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors" @click="mobileMenuOpen = false">Kontak</a>
+                
+                @auth
+                    @if(Auth::user()->isAdmin())
+                        <!-- Admin Mobile Menu -->
+                        <div class="border-t border-gray-100 pt-3 mt-3">
+                            <div class="px-3 py-2">
+                                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Menu Master</span>
+                            </div>
+                            
+                            <a href="{{ route('dashboard') }}" class="flex items-center px-3 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors" @click="mobileMenuOpen = false">
+                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4"/>
+                                </svg>
+                                Dashboard
+                            </a>
+                            
+                            <a href="{{ route('user-index') }}" class="flex items-center px-3 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors" @click="mobileMenuOpen = false">
+                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                                </svg>
+                                Kelola User
+                            </a>
+                            <a href="{{ route('role-index') }}" class="flex items-center px-3 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors" @click="mobileMenuOpen = false">
+                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
+                                Kelola Role
+                            </a>
+                            <a href="{{ route('menu-index') }}" class="flex items-center px-3 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors" @click="mobileMenuOpen = false">
+                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
+                                </svg>
+                                Kelola Menu
+                            </a>
+                            
+                            <a href="{{ route('lesson-package-index') }}" class="flex items-center px-3 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors" @click="mobileMenuOpen = false">
+                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                </svg>
+                                Paket Pelajaran
+                            </a>
+                            
+                            <a href="{{ route('financial-index') }}" class="flex items-center px-3 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors" @click="mobileMenuOpen = false">
+                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                                </svg>
+                                Keuangan
+                            </a>
+                            
+                            <a href="{{ route('master.attendance.index') }}" class="flex items-center px-3 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors" @click="mobileMenuOpen = false">
+                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012-2m-6 9l2 2 4-4"/>
+                                </svg>
+                                Absensi Master
+                            </a>
+                        </div>
+                    @elseif(Auth::user()->hasRole('Guru'))
+                        <!-- Guru Mobile Menu -->
+                        <div class="border-t border-gray-100 pt-3 mt-3">
+                            <div class="px-3 py-2">
+                                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Menu Guru</span>
+                            </div>
+                            <a href="{{ route('teacher.attendance.index') }}" class="flex items-center px-3 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors" @click="mobileMenuOpen = false">
+                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012-2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                </svg>
+                                Absensi Saya
+                            </a>
+                            <a href="{{ route('teacher.attendance.history') }}" class="flex items-center px-3 py-2 text-gray-700 hover:text-blue-600 font-medium transition-colors" @click="mobileMenuOpen = false">
+                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Riwayat Absensi
+                            </a>
+                        </div>
+                    @endif
+                @endauth
                 
                 @guest
                     <div class="border-t border-gray-100 pt-3 mt-3">
@@ -218,7 +471,7 @@
                                         </div>
                                         <div>
                                             <div class="text-white font-bold">Sertifikat Resmi</div>
-                                            <div class="text-blue-100 text-sm">Diakui Internasional</div>
+                                            <div class="text-blue-100 text-sm">Diakui Nasional</div>
                                         </div>
                                     </div>
                                 </div>
@@ -676,7 +929,7 @@
             <div class="text-center mt-12">
                 <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
                     <h3 class="text-lg font-bold text-gray-900 mb-2">Masih ada pertanyaan?</h3>
-                    <p class="text-gray-600 mb-4">Tim customer service kami siap membantu Anda 24/7</p>
+                    <p class="text-gray-600 mb-4">Tim customer service kami siap membantu anda</p>
                     <a href="#kontak" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-200">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
@@ -714,7 +967,7 @@
                     </svg>
                     Daftar Sekarang
                 </a>
-                <a href="tel:+62123456789" 
+                <a href="https://wa.me/6281217130420" 
                    class="inline-flex items-center justify-center px-8 py-4 border-2 border-white/30 text-white font-semibold text-lg rounded-xl hover:bg-white/10 transition-all duration-200">
                     <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
@@ -731,14 +984,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                     <h3 class="text-white font-semibold mb-1">Alamat</h3>
-                    <p class="text-blue-100 text-sm">Jl. Pendidikan No. 123<br>Jakarta Selatan</p>
+                    <p class="text-blue-100 text-sm">Jl. Mojo No.105, Tertek, Tertek, Kec. Pare, Kabupaten Kediri, Jawa Timur 64215</p>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
                     <svg class="w-8 h-8 text-yellow-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                     </svg>
                     <h3 class="text-white font-semibold mb-1">Telepon</h3>
-                    <p class="text-blue-100 text-sm">+62 123 456 789<br>+62 987 654 321</p>
+                    <p class="text-blue-100 text-sm">+62 81 217 130 420</p>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
                     <svg class="w-8 h-8 text-yellow-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -746,6 +999,83 @@
                     </svg>
                     <h3 class="text-white font-semibold mb-1">Email</h3>
                     <p class="text-blue-100 text-sm">info@beswan.com<br>support@beswan.com</p>
+                </div>
+            </div>
+
+            <!-- Lokasi Section -->
+            <div class="mt-16">
+                <div class="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20 max-w-6xl mx-auto">
+                    <div class="text-center mb-8">
+                        <h3 class="text-3xl font-bold text-white mb-4">📍 Lokasi Kami</h3>
+                        <p class="text-blue-100 text-lg">Temukan kami di Kampung Inggris Pare, Kediri</p>
+                    </div>
+                    
+                    <!-- Map Container - Full Width -->
+                    <div class="w-full">
+                        <!-- Google Maps Embed - Full Width -->
+                        <div class="relative rounded-2xl overflow-hidden shadow-2xl mb-8">
+                            <div class="bg-gray-200 rounded-2xl overflow-hidden">
+                                <iframe 
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3952.9!2d112.19!3d-7.76!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e785963b1234567%3A0x123456789abcdef0!2sJl.%20Mojo%20No.105%2C%20Tertek%2C%20Kec.%20Pare%2C%20Kabupaten%20Kediri%2C%20Jawa%20Timur%2064215!5e0!3m2!1sen!2sid!4v1703123456789!5m2!1sen!2sid"
+                                    width="100%" 
+                                    height="450" 
+                                    style="border:0;" 
+                                    allowfullscreen="" 
+                                    loading="lazy" 
+                                    referrerpolicy="no-referrer-when-downgrade"
+                                    class="rounded-2xl">
+                                </iframe>
+                            </div>
+                            
+                            <!-- Simple Map Overlay -->
+                            <div class="absolute top-4 left-4">
+                                <div class="bg-white/95 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                                        <span class="text-gray-800 font-semibold text-sm">BESWAN Course</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Location Info - Centered & Simplified -->
+                        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 text-center">
+                            <div class="mb-6">
+                                <h4 class="text-2xl font-bold text-white mb-4 flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-yellow-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                    Alamat Lengkap
+                                </h4>
+                                <div class="text-blue-100 text-xl leading-relaxed mb-8">
+                                    <p class="font-semibold text-2xl text-white mb-2">Jl. Mojo No.105, Tertek, Tertek</p>
+                                    <p class="text-lg">Kec. Pare, Kabupaten Kediri</p>
+                                    <p class="text-lg">Jawa Timur 64215, Indonesia</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Action Buttons - Horizontal Layout -->
+                            <div class="flex flex-col sm:flex-row gap-4 justify-center max-w-2xl mx-auto">
+                                <a href="https://maps.google.com/?q=Jl.+Mojo+No.105,+Tertek,+Kec.+Pare,+Kabupaten+Kediri,+Jawa+Timur+64215" 
+                                   target="_blank"
+                                   class="flex items-center justify-center px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl transition-all duration-200 shadow-lg text-lg font-semibold">
+                                    <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m-6 3l6-3"/>
+                                    </svg>
+                                    Buka di Google Maps
+                                </a>
+                                
+                                <button onclick="copyAddress()" 
+                                        class="flex items-center justify-center px-6 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl transition-all duration-200 text-lg font-semibold">
+                                    <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    </svg>
+                                    Salin Alamat
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -839,6 +1169,211 @@
                         link.classList.remove('text-gray-700');
                         link.classList.add('text-gray-900');
                     }
+                });
+            });
+        });
+    </script>
+
+    <!-- Simple Address Copy Script -->
+    <script>
+        // Alamat BESWAN Course
+        const beswanAddress = "Jl. Mojo No.105, Tertek, Kec. Pare, Kabupaten Kediri, Jawa Timur 64215";
+
+        // Fungsi untuk menyalin alamat
+        function copyAddress() {
+            navigator.clipboard.writeText(beswanAddress).then(function() {
+                alert('✅ Alamat berhasil disalin!');
+            }).catch(function() {
+                // Fallback untuk browser lama
+                const textArea = document.createElement('textarea');
+                textArea.value = beswanAddress;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('✅ Alamat berhasil disalin!');
+            });
+        }
+    </script>
+
+        // Fungsi untuk menyalin alamat
+        function copyAddress() {
+            navigator.clipboard.writeText(beswanLocation.address).then(function() {
+                // Buat notifikasi
+                showNotification('Alamat berhasil disalin ke clipboard!', 'success');
+            }, function(err) {
+                showNotification('Gagal menyalin alamat. Silakan coba lagi.', 'error');
+            });
+        }
+
+        // Fungsi untuk mendapatkan lokasi pengguna dan menghitung jarak
+        function calculateDistance() {
+            if (navigator.geolocation) {
+                const distanceInfo = document.getElementById('distanceInfo');
+                distanceInfo.innerHTML = '<p class="text-blue-100">📍 Mendapatkan lokasi Anda...</p>';
+                
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    
+                    // Hitung jarak menggunakan formula Haversine
+                    const distance = calculateDistanceHaversine(userLat, userLng, beswanLocation.lat, beswanLocation.lng);
+                    
+                    // Estimasi waktu tempuh (asumsi kecepatan rata-rata 40 km/jam)
+                    const travelTime = Math.round((distance / 40) * 60); // dalam menit
+                    
+                    distanceInfo.innerHTML = `
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span class="text-white font-semibold">Jarak: ${distance.toFixed(1)} km</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span class="text-blue-100">Estimasi: ~${travelTime} menit berkendara</span>
+                            </div>
+                            <button onclick="openDirections(${userLat}, ${userLng})" 
+                                    class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                                🧭 Lihat Rute Perjalanan
+                            </button>
+                        </div>
+                    `;
+                }, function(error) {
+                    let errorMessage = 'Tidak dapat mengakses lokasi Anda.';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'Akses lokasi ditolak. Silakan aktifkan GPS dan izinkan akses lokasi.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Informasi lokasi tidak tersedia.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'Timeout mendapatkan lokasi.';
+                            break;
+                    }
+                    
+                    distanceInfo.innerHTML = `
+                        <div class="space-y-3">
+                            <p class="text-red-300">❌ ${errorMessage}</p>
+                            <button onclick="calculateDistance()" 
+                                    class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+                                🔄 Coba Lagi
+                            </button>
+                        </div>
+                    `;
+                });
+            } else {
+                document.getElementById('distanceInfo').innerHTML = 
+                    '<p class="text-red-300">❌ Browser Anda tidak mendukung Geolocation.</p>';
+            }
+        }
+
+        // Fungsi untuk membuka directions di Google Maps
+        function openDirections(userLat, userLng) {
+            const url = `https://www.google.com/maps/dir/${userLat},${userLng}/${beswanLocation.lat},${beswanLocation.lng}`;
+            window.open(url, '_blank');
+        }
+
+        // Fungsi untuk mendapatkan lokasi pengguna saat ini
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                showNotification('📍 Mendapatkan lokasi Anda...', 'info');
+                
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    
+                    showNotification('✅ Lokasi berhasil didapat!', 'success');
+                    
+                    // Buka Google Maps dengan lokasi pengguna
+                    const url = `https://www.google.com/maps/@${userLat},${userLng},15z`;
+                    window.open(url, '_blank');
+                }, function(error) {
+                    showNotification('❌ Gagal mendapatkan lokasi Anda.', 'error');
+                });
+            } else {
+                showNotification('❌ Browser tidak mendukung Geolocation.', 'error');
+            }
+        }
+
+        // Formula Haversine untuk menghitung jarak antara dua koordinat
+        function calculateDistanceHaversine(lat1, lng1, lat2, lng2) {
+            const R = 6371; // Radius bumi dalam kilometer
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLng/2) * Math.sin(dLng/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Fungsi untuk menampilkan notifikasi
+        function showNotification(message, type = 'info') {
+            // Hapus notifikasi sebelumnya jika ada
+            const existingNotification = document.getElementById('mapNotification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            // Buat elemen notifikasi
+            const notification = document.createElement('div');
+            notification.id = 'mapNotification';
+            notification.className = `fixed top-20 right-4 z-50 px-6 py-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full`;
+            
+            // Tentukan warna berdasarkan type
+            let bgColor = 'bg-blue-600';
+            if (type === 'success') bgColor = 'bg-green-600';
+            else if (type === 'error') bgColor = 'bg-red-600';
+            else if (type === 'warning') bgColor = 'bg-yellow-600';
+            
+            notification.className += ` ${bgColor} text-white`;
+            notification.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+
+            // Tambahkan ke body
+            document.body.appendChild(notification);
+
+            // Animasi slide in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+
+            // Hapus otomatis setelah 4 detik
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.classList.add('translate-x-full');
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, 4000);
+        }
+
+        // Event listener untuk smooth scroll ke section kontak saat klik menu
+        document.addEventListener('DOMContentLoaded', function() {
+            const contactLinks = document.querySelectorAll('a[href="#kontak"]');
+            contactLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.getElementById('kontak').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
                 });
             });
         });

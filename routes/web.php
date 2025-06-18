@@ -1,14 +1,13 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\Auth\CustomAuthController;
 use App\Http\Controllers\AttendanceController;
-use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\FinancialLogController;
 use App\Http\Controllers\LessonPackageController;
 use App\Http\Controllers\Master\RoleController;
 use App\Http\Controllers\Master\UserController;
 use App\Http\Controllers\Master\MenuController;
+use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TeacherAttendanceController;
 use App\Http\Controllers\TransactionController;
@@ -27,21 +26,20 @@ use Illuminate\Support\Facades\Auth;
 |
 */
 
-// Route::get('/csrf-token', function () {
-//     return response()->json(['csrf_token' => csrf_token()]);
-// });
-
-
 Route::get('/', [ViewController::class, 'index'])->name('home');
 
-Route::get('/login', [CustomAuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [CustomAuthController::class, 'login'])->name('login.post');
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::get('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/register', [AuthController::class, 'registerPost'])->name('register.post');
 
+// SSO Routes
+Route::get('/auth/{provider}', [AuthController::class, 'redirectToProvider'])->name('auth.provider');
+Route::get('/auth/{provider}/callback', [AuthController::class, 'handleProviderCallback']);
+
 Route::middleware(['auth'])->group(function () {
 
-    Route::post('/logout', [CustomAuthController::class, 'logout'])->name('logout');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::prefix('/profile')->group(function () {
         Route::get('/', [ProfileController::class, 'index'])->name('profile-index')->middleware('permission:profile,read');
@@ -117,8 +115,6 @@ Route::middleware(['auth'])->group(function () {
             Route::patch('/close/{attendance}', [AttendanceController::class, 'close'])->name('close')->middleware('permission:attendance_master,update');
             Route::patch('/reopen/{attendance}', [AttendanceController::class, 'reopen'])->name('reopen')->middleware('permission:attendance_master,update');
         });
-
-        Route::get('/settings', [ConfigController::class, 'index'])->name('settings')->middleware('permission:settings,read');
     });
 
     // Teacher Attendance Routes
@@ -136,8 +132,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/success', [TransactionController::class, 'success'])->name('transaction.success');
         Route::get('/failed', [TransactionController::class, 'failed'])->name('transaction.failed');
     });
+
+    // Midtrans routes
+    Route::prefix('/midtrans')->group(function () {
+        Route::post('/create-invoice', [MidtransController::class, 'createInvoiceMidtrans'])->name('midtrans.create-invoice');
+        Route::get('/payment-redirect', [MidtransController::class, 'paymentRedirect'])->name('midtrans.payment-redirect');
+        Route::post('/check-status', [MidtransController::class, 'checkPaymentStatus'])->name('midtrans.check-status');
+    });
 });
 
-
+// Webhooks (no auth required)
 Route::post('/xendit/webhook', [TransactionController::class, 'handleWebhook'])->name('xendit.webhook');
+Route::post('/midtrans/webhook', [MidtransController::class, 'handleNotification'])->name('midtrans.webhook');
 

@@ -36,9 +36,6 @@ class RolePermissionSeeder extends Seeder
                     if ($menu->menu_slug === 'dashboard' || $menu->menu_slug === 'home' || $menu->menu_slug === 'logout') {
                         // Dashboard, home, logout only need read access
                         $permissions = ['read'];
-                    } elseif ($menu->menu_slug === 'settings') {
-                        // Settings can be read and updated
-                        $permissions = ['read', 'update'];
                     }
                     
                     foreach ($permissions as $permission) {
