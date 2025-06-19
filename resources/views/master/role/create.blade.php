@@ -107,7 +107,7 @@
                                         <label for="menu_{{ $menu->menu_id }}" class="text-sm font-medium text-gray-900 cursor-pointer">
                                             {{ $menu->menu_name }}
                                         </label>
-                                        <p class="text-xs text-gray-500">{{ $menu->menu_route ?: 'No route' }}</p>
+                                        <p class="text-xs text-gray-500">{{ $menu->menu_link ?: 'No route' }}</p>
                                         
                                         <!-- Permissions for Parent Menu -->
                                         <div class="mt-3 permission-section" style="display: {{ in_array($menu->menu_id, old('menus', [])) ? 'block' : 'none' }};">
@@ -143,7 +143,7 @@
                                                     <label for="menu_{{ $child->menu_id }}" class="text-sm text-gray-800 cursor-pointer">
                                                         {{ $child->menu_name }}
                                                     </label>
-                                                    <p class="text-xs text-gray-500">{{ $child->menu_route ?: 'No route' }}</p>
+                                                    <p class="text-xs text-gray-500">{{ $child->menu_link ?: 'No route' }}</p>
                                                     
                                                     <!-- Permissions for Child Menu -->
                                                     <div class="mt-2 permission-section" style="display: {{ in_array($child->menu_id, old('menus', [])) ? 'block' : 'none' }};">

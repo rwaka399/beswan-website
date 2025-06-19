@@ -83,7 +83,19 @@
         </div>
 
         <!-- Premium Status Card -->
-        @if(auth()->user()->isPremium())
+        @php
+            $userPackages = auth()->user()->userLessonPackages()
+                ->whereIn('status', ['active', 'scheduled'])
+                ->where('end_date', '>', now())
+                ->orderBy('end_date', 'desc')
+                ->get();
+            
+            $activePackage = $userPackages->where('status', 'active')->first();
+            $scheduledPackage = $userPackages->where('status', 'scheduled')->first();
+        @endphp
+
+        @if($activePackage)
+        <!-- Active Premium Card -->
         <div class="mb-8 fade-in-delay">
             <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200">
                 <div class="flex items-center justify-center mb-4">
@@ -91,39 +103,83 @@
                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                         </svg>
-                        Status Premium Aktif!
+                        ⭐ Status Premium Aktif!
                     </div>
                 </div>
                 <p class="text-center text-gray-700 mb-4">
-                    Akun Anda telah berhasil di-upgrade ke Premium. Anda dapat mengakses semua materi pembelajaran yang tersedia.
+                    Selamat! Akun Anda telah berhasil di-upgrade ke Premium. Anda dapat mengakses semua materi pembelajaran yang tersedia.
                 </p>
                 
-                @php
-                    $latestPackage = auth()->user()->userLessonPackages()
-                        ->where('status', 'active')
-                        ->where('end_date', '>', now())
-                        ->orderBy('end_date', 'desc')
-                        ->first();
-                @endphp
-                
-                @if($latestPackage)
                 <div class="bg-white rounded-lg p-4 shadow-sm">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                         <div>
                             <p class="text-sm text-gray-500">Berlaku hingga</p>
-                            <p class="font-bold text-orange-600">{{ $latestPackage->end_date->format('d M Y') }}</p>
+                            <p class="font-bold text-orange-600">{{ $activePackage->end_date->format('d M Y') }}</p>
                         </div>
                         <div>
                             <p class="text-sm text-gray-500">Sisa waktu</p>
-                            <p class="font-bold text-blue-600">{{ now()->diffInDays($latestPackage->end_date) }} hari</p>
+                            <p class="font-bold text-blue-600">{{ now()->diffInDays($activePackage->end_date) }} hari</p>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-500">Akses penuh</p>
-                            <p class="font-bold text-green-600">{{ $latestPackage->lessonPackage->duration_in_days }} hari</p>
+                            <p class="text-sm text-gray-500">Total durasi</p>
+                            <p class="font-bold text-green-600">{{ $activePackage->lessonPackage->formatted_duration }}</p>
                         </div>
                     </div>
                 </div>
-                @endif
+            </div>
+        </div>
+        @elseif($scheduledPackage)
+        <!-- Scheduled Premium Card -->
+        <div class="mb-8 fade-in-delay">
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                <div class="flex items-center justify-center mb-4">
+                    <div class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-full shadow-lg">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        📅 Premium Terjadwal
+                    </div>
+                </div>
+                <p class="text-center text-gray-700 mb-4">
+                    Premium Anda akan aktif pada tanggal yang telah Anda pilih. Kami akan mengaktifkannya secara otomatis!
+                </p>
+                
+                <div class="bg-white rounded-lg p-4 shadow-sm">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                        <div>
+                            <p class="text-sm text-gray-500">Mulai premium</p>
+                            <p class="font-bold text-blue-600">{{ $scheduledPackage->scheduled_start_date->format('d M Y') }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Akan berakhir</p>
+                            <p class="font-bold text-orange-600">{{ $scheduledPackage->end_date->format('d M Y') }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Durasi premium</p>
+                            <p class="font-bold text-green-600">{{ $scheduledPackage->lessonPackage->formatted_duration }}</p>
+                        </div>
+                    </div>
+                    
+                    @if($scheduledPackage->scheduled_start_date->isToday())
+                        <div class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <div class="flex items-center text-green-800">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="font-medium">Premium akan aktif hari ini!</span>
+                            </div>
+                        </div>
+                    @elseif($scheduledPackage->scheduled_start_date->isFuture())
+                        <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div class="flex items-center text-blue-800">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="font-medium">Menunggu {{ $scheduledPackage->scheduled_start_date->diffInDays(now()) }} hari lagi</span>
+                            </div>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
         @endif

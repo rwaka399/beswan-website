@@ -6,333 +6,353 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Checkout - {{ $package->lesson_package_name }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes bounce-in {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .bounce-in { animation: bounce-in 0.6s ease-out; }
+        .fade-in { animation: fade-in 0.5s ease-out; }
+        .fade-in-delay { animation: fade-in 0.5s ease-out 0.2s both; }
+    </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-blue-100 min-h-screen flex items-center justify-center py-12 px-4">
 
-    <div class="w-full max-w-xl bg-white shadow-2xl rounded-3xl p-10">
-        <h1 class="text-3xl font-extrabold text-gray-800 mb-6">
-            Checkout: <span class="text-blue-600">{{ $package->lesson_package_name }}</span>
-        </h1>
+    <div class="w-full max-w-2xl bg-white shadow-2xl rounded-3xl p-8 bounce-in">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-4">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6 0a2 2 0 11-4 0 2 2 0 014 0zm6 0a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+            </div>
+            <h1 class="text-3xl font-extrabold text-gray-800 mb-2">
+                Checkout Paket Premium
+            </h1>
+            <p class="text-gray-600">{{ $package->lesson_package_name }}</p>
+        </div>
 
-        <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-6">
-            <p class="text-lg text-gray-700 mb-2">
-                <strong>Harga:</strong> 
-                <span class="text-green-600 font-semibold">
-                    Rp {{ number_format($package->lesson_package_price, 0, ',', '.') }}
-                </span>
-            </p>
-            <p class="text-lg text-gray-700 mb-2">
-                <strong>Durasi:</strong> 
-                <span class="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
-                    {{ $package->lesson_duration }} Minggu
-                </span>
-            </p>
-            <p class="text-lg text-gray-700">
-                <strong>Deskripsi:</strong> 
-                <span class="text-gray-600">
-                    {{ $package->lesson_package_description ?? 'Paket ini menawarkan pembelajaran bahasa Inggris yang interaktif dan terjangkau.' }}
-                </span>
-            </p>
+        <!-- Package Info Card -->
+        <div class="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-2xl p-6 mb-8 fade-in">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h3 class="font-semibold text-gray-800 mb-3">Detail Paket</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Harga:</span>
+                            <span class="font-bold text-green-600">
+                                Rp {{ number_format($package->lesson_package_price, 0, ',', '.') }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Durasi:</span>
+                            <span class="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+                                {{ $package->formatted_duration }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-800 mb-3">Periode Premium</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center text-blue-700">
+                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                            </svg>
+                            <span><strong>Mulai:</strong> <span id="start-date-display">{{ Carbon\Carbon::parse($minDate)->format('d M Y') }}</span></span>
+                        </div>
+                        <div class="flex items-center text-blue-700">
+                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                            </svg>
+                            <span><strong>Berakhir:</strong> <span id="end-date-display">{{ $package->getEndDate(Carbon\Carbon::parse($minDate))->format('d M Y') }}</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            @if($package->lesson_package_description)
+            <div class="mt-4 pt-4 border-t border-blue-200">
+                <p class="text-gray-700 text-sm">
+                    <strong>Deskripsi:</strong> {{ $package->lesson_package_description }}
+                </p>
+            </div>
+            @endif
         </div>
 
         @if (session('error'))
-            <div class="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
-                {{ session('error') }}
+            <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    {{ session('error') }}
+                </div>
             </div>
         @endif
 
-        <form id="payment-form" method="POST" action="{{ route('transaction.create-invoice') }}" novalidate class="space-y-6">
+        <form id="payment-form" method="POST" action="{{ route('transaction.create-invoice') }}" novalidate class="space-y-6 fade-in-delay">
             @csrf
             <input type="hidden" name="lesson_package_id" value="{{ $package->lesson_package_id }}">
 
+            <!-- Email -->
             <div>
-                <label for="email" class="block text-gray-700 font-semibold mb-1">Email</label>
+                <label for="email" class="block text-gray-700 font-semibold mb-2">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
+                    </svg>
+                    Email Pembayaran
+                </label>
                 <input type="email" name="email" id="email"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     value="{{ auth()->user()->email ?? '' }}" required>
-                <p class="text-sm text-gray-500 mt-1">Email akan digunakan untuk notifikasi pembayaran.</p>
+                <p class="text-sm text-gray-500 mt-1">Email untuk menerima notifikasi pembayaran dan akses premium.</p>
                 @error('email')
-                    <span class="text-sm text-red-600">{{ $message }}</span>
+                    <span class="text-sm text-red-600 flex items-center mt-1">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                        {{ $message }}
+                    </span>
                 @enderror
             </div>
             
+            <!-- Tanggal Mulai Premium -->
             <div>
-                <label for="scheduled_start_date" class="block text-gray-700 font-semibold mb-1">Tanggal Mulai</label>
+                <label for="scheduled_start_date" class="block text-gray-700 font-semibold mb-2">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    Tanggal Mulai Premium
+                </label>
                 <input type="date" name="scheduled_start_date" id="scheduled_start_date"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     min="{{ $minDate }}" max="{{ $maxDate }}" value="{{ $minDate }}" required>
-                <p class="text-sm text-gray-500 mt-1">Pilih tanggal kapan Anda ingin memulai paket. Status premium akan aktif mulai tanggal ini.</p>
+                
+                <div class="mt-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-amber-600 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                        <div>
+                            <p class="text-sm text-amber-800 font-medium">Informasi Penting:</p>
+                            <p class="text-sm text-amber-700 mt-1">
+                                Status premium akan aktif mulai tanggal yang Anda pilih. Jika memilih tanggal hari ini, premium akan aktif segera setelah pembayaran berhasil.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
                 @error('scheduled_start_date')
-                    <span class="text-sm text-red-600">{{ $message }}</span>
+                    <span class="text-sm text-red-600 flex items-center mt-2">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                        {{ $message }}
+                    </span>
                 @enderror
             </div>
             
+            <!-- Catatan -->
             <div>
-                <label for="schedule_notes" class="block text-gray-700 font-semibold mb-1">Catatan (Opsional)</label>
+                <label for="schedule_notes" class="block text-gray-700 font-semibold mb-2">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    Catatan (Opsional)
+                </label>
                 <textarea name="schedule_notes" id="schedule_notes"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-20"
-                    placeholder="Tambahkan catatan jika ada..."></textarea>
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all"
+                    rows="3" placeholder="Tambahkan catatan khusus jika ada..."></textarea>
             </div>
 
-            <!-- Payment Gateway Selection -->
+            <!-- Payment Methods -->
             <div>
-                <label class="block text-gray-700 font-semibold mb-3">Pilih Payment Gateway</label>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <!-- Xendit Option -->
-                    <label class="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 payment-gateway-option">
-                        <input type="radio" name="payment_gateway" value="xendit" class="mr-3 text-blue-600" checked>
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
-                                <span class="text-white font-bold text-sm">X</span>
-                            </div>
-                            <div>
-                                <div class="font-semibold text-gray-900">Xendit</div>
-                                <div class="text-sm text-gray-500">Transfer Bank, E-Wallet, QRIS</div>
-                            </div>
-                        </div>
-                    </label>
-
-                    <!-- Midtrans Option -->
-                    <label class="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 payment-gateway-option">
-                        <input type="radio" name="payment_gateway" value="midtrans" class="mr-3 text-green-600">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center mr-3">
-                                <span class="text-white font-bold text-sm">M</span>
-                            </div>
-                            <div>
-                                <div class="font-semibold text-gray-900">Midtrans</div>
-                                <div class="text-sm text-gray-500">Kartu Kredit, GoPay, ShopeePay</div>
-                            </div>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
-            <div id="xendit-payment-methods">
-                <label class="block text-gray-700 font-semibold mb-3">Pilih Metode Pembayaran</label>
+                <label class="block text-gray-700 font-semibold mb-3">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                    </svg>
+                    Pilih Metode Pembayaran
+                </label>
                 
                 <!-- Bank Transfer Section -->
-                <div class="mb-4 border border-gray-200 rounded-lg overflow-hidden">
+                <div class="mb-4 border border-gray-200 rounded-xl overflow-hidden">
                     <button type="button" onclick="toggleAccordion('bank-transfer')" 
                             class="w-full p-4 bg-gray-50 hover:bg-gray-100 flex items-center justify-between transition-colors">
                         <div class="flex items-center">
                             <svg class="w-5 h-5 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                             </svg>
                             <span class="font-semibold text-gray-700">Bank Transfer</span>
                         </div>
                         <svg id="bank-transfer-icon" class="w-5 h-5 text-gray-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
                     <div id="bank-transfer-content" class="hidden p-4 bg-white">
                         <div class="grid grid-cols-2 gap-3">
                             @foreach (['MANDIRI', 'BCA', 'BNI', 'BRI'] as $bank)
-                                <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                    <input type="radio" name="payment_method" value="{{ $bank }}" required class="mr-3 text-blue-600">
-                                    <div class="flex items-center">
-                                        <div class="w-8 h-8 bg-blue-100 rounded flex items-center justify-center mr-3">
-                                            <span class="text-xs font-bold text-blue-600">{{ substr($bank, 0, 3) }}</span>
-                                        </div>
-                                        <span class="font-medium text-gray-700">{{ $bank }}</span>
+                                <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors group">
+                                    <input type="radio" name="payment_method" value="{{ $bank }}" class="sr-only">
+                                    <div class="w-4 h-4 rounded-full border-2 border-gray-300 group-hover:border-blue-500 mr-3 flex items-center justify-center">
+                                        <div class="w-2 h-2 rounded-full bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                     </div>
+                                    <span class="font-medium">{{ $bank }}</span>
                                 </label>
                             @endforeach
                         </div>
+                        <p class="text-xs text-gray-500 mt-3">Transfer langsung ke rekening bank pilihan Anda</p>
                     </div>
                 </div>
 
                 <!-- E-Wallet Section -->
-                <div class="mb-4 border border-gray-200 rounded-lg overflow-hidden">
+                <div class="mb-4 border border-gray-200 rounded-xl overflow-hidden">
                     <button type="button" onclick="toggleAccordion('e-wallet')" 
                             class="w-full p-4 bg-gray-50 hover:bg-gray-100 flex items-center justify-between transition-colors">
                         <div class="flex items-center">
                             <svg class="w-5 h-5 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                             </svg>
                             <span class="font-semibold text-gray-700">E-Wallet</span>
                         </div>
                         <svg id="e-wallet-icon" class="w-5 h-5 text-gray-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </button>
                     <div id="e-wallet-content" class="hidden p-4 bg-white">
                         <div class="grid grid-cols-2 gap-3">
-                            @foreach (['OVO', 'DANA', 'GOPAY', 'SHOPEEPAY'] as $ewallet)
-                                <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                    <input type="radio" name="payment_method" value="{{ $ewallet }}" required class="mr-3 text-green-600">
-                                    <div class="flex items-center">
-                                        <div class="w-8 h-8 bg-gradient-to-r from-green-400 to-green-600 rounded flex items-center justify-center mr-3">
-                                            <span class="text-xs font-bold text-white">{{ substr($ewallet, 0, 1) }}</span>
-                                        </div>
-                                        <span class="font-medium text-gray-700">{{ $ewallet }}</span>
+                            @foreach (['OVO', 'DANA', 'GOPAY', 'SHOPEEPAY'] as $wallet)
+                                <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors group">
+                                    <input type="radio" name="payment_method" value="{{ $wallet }}" class="sr-only">
+                                    <div class="w-4 h-4 rounded-full border-2 border-gray-300 group-hover:border-green-500 mr-3 flex items-center justify-center">
+                                        <div class="w-2 h-2 rounded-full bg-green-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                     </div>
+                                    <span class="font-medium">{{ $wallet }}</span>
                                 </label>
                             @endforeach
                         </div>
+                        <p class="text-xs text-gray-500 mt-3">Bayar dengan dompet digital favorit Anda</p>
                     </div>
                 </div>
 
                 <!-- QRIS Section -->
-                <div class="mb-4 border border-gray-200 rounded-lg overflow-hidden">
-                    <button type="button" onclick="toggleAccordion('qris')" 
-                            class="w-full p-4 bg-gray-50 hover:bg-gray-100 flex items-center justify-between transition-colors">
+                <div class="mb-4 border border-gray-200 rounded-xl overflow-hidden">
+                    <label class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors group">
+                        <input type="radio" name="payment_method" value="QRIS" class="sr-only">
+                        <div class="w-4 h-4 rounded-full border-2 border-gray-300 group-hover:border-purple-500 mr-3 flex items-center justify-center">
+                            <div class="w-2 h-2 rounded-full bg-purple-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </div>
                         <div class="flex items-center">
                             <svg class="w-5 h-5 mr-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
                             </svg>
-                            <span class="font-semibold text-gray-700">QRIS</span>
-                        </div>
-                        <svg id="qris-icon" class="w-5 h-5 text-gray-400 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </button>
-                    <div id="qris-content" class="hidden p-4 bg-white">
-                        <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                            <input type="radio" name="payment_method" value="QRIS" required class="mr-3 text-purple-600">
-                            <div class="flex items-center">
-                                <div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-purple-600 rounded flex items-center justify-center mr-3">
-                                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM15 19h2v2h-2zM17 13h2v2h-2zM19 15h2v2h-2zM17 17h2v2h-2zM19 19h2v2h-2z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <span class="font-medium text-gray-700">QRIS</span>
-                                    <p class="text-xs text-gray-500">Scan QR Code untuk pembayaran</p>
-                                </div>
+                            <div>
+                                <span class="font-semibold text-gray-700">QRIS</span>
+                                <p class="text-xs text-gray-500">Scan QR Code untuk pembayaran cepat</p>
                             </div>
-                        </label>
-                    </div>
+                        </div>
+                    </label>
                 </div>
 
                 @error('payment_method')
-                    <span class="text-sm text-red-600">{{ $message }}</span>
+                    <span class="text-sm text-red-600 flex items-center mt-2">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                        {{ $message }}
+                    </span>
                 @enderror
             </div>
 
-            <!-- Midtrans Note -->
-            <div id="midtrans-note" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div class="flex items-center">
-                    <svg class="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+                <a href="{{ route('home') }}" class="inline-flex items-center text-gray-600 hover:text-gray-800 transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                     </svg>
-                    <div>
-                        <p class="text-sm text-blue-800 font-medium">Menggunakan Midtrans</p>
-                        <p class="text-xs text-blue-600">Anda akan diarahkan ke halaman pembayaran Midtrans untuk memilih metode pembayaran.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-between mt-8">
-                <a href="{{ route('home') }}" class="text-gray-600 hover:underline text-sm">
-                    ← Kembali ke Daftar Paket
+                    Kembali ke Daftar Paket
                 </a>
 
                 <button type="submit" id="pay-button"
-                    class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-semibold">
+                    class="inline-flex items-center bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105 font-semibold shadow-lg">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
                     Bayar Sekarang
                 </button>
             </div>
         </form>
     </div>
-</div>
 
-<!-- Status Check Modal -->
-<div id="statusCheckModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-    <div class="bg-white rounded-lg p-6 max-w-md mx-4 w-full">
-        <div class="text-center">
-            <div class="mb-4">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-                    <svg class="w-8 h-8 text-blue-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Menunggu Pembayaran</h3>
-                <p class="text-gray-600 mb-4">Silakan selesaikan pembayaran Anda. Kami akan mengecek status pembayaran secara otomatis.</p>
-                
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                    <p class="text-sm text-blue-800">
-                        <strong>Order ID:</strong> <span id="modalOrderId" class="font-mono"></span>
-                    </p>
-                </div>
-
-                <div class="flex items-center justify-center space-x-2 text-sm text-gray-500">
-                    <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
-                    <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                    <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                    <span class="ml-2">Mengecek status pembayaran...</span>
-                </div>
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-8 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                <svg class="w-8 h-8 text-blue-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
             </div>
-
-            <div class="space-y-3">
-                <button id="checkStatusBtn" onclick="checkPaymentStatus()" 
-                        class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition duration-200">
-                    Cek Status Manual
-                </button>
-                <button onclick="closeStatusModal()" 
-                        class="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-200 transition duration-200">
-                    Tutup
-                </button>
-            </div>
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Memproses Pembayaran</h3>
+            <p class="text-gray-600">Harap tunggu, kami sedang memproses permintaan Anda...</p>
         </div>
     </div>
-</div>
-
-<!-- Midtrans Snap Script -->
-    @if (config('services.midtrans.client_key'))
-    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
-    @endif
 
     <script>
         const paymentForm = document.getElementById('payment-form');
         const payButton = document.getElementById('pay-button');
-        const xenditMethods = document.getElementById('xendit-payment-methods');
-        const midtransNote = document.getElementById('midtrans-note');
+        const loadingModal = document.getElementById('loadingModal');
+        const packageDurationDays = {{ $package->duration_in_days }};
 
-        // Payment Gateway Selection Handler
-        document.querySelectorAll('input[name="payment_gateway"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                // Remove selected state from all gateway options
-                document.querySelectorAll('.payment-gateway-option').forEach(option => {
-                    option.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50', 'ring-green-500', 'bg-green-50');
-                });
-                
-                // Add selected state to current option
-                const currentOption = this.closest('.payment-gateway-option');
-                if (this.value === 'xendit') {
-                    currentOption.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50');
-                    xenditMethods.style.display = 'block';
-                    midtransNote.classList.add('hidden');
-                    
-                    // Clear Xendit payment method requirement
-                    document.querySelectorAll('input[name="payment_method"]').forEach(input => {
-                        input.removeAttribute('required');
-                    });
-                    // Add required back to Xendit methods
-                    document.querySelectorAll('#xendit-payment-methods input[name="payment_method"]').forEach(input => {
-                        input.setAttribute('required', 'required');
-                    });
-                } else {
-                    currentOption.classList.add('ring-2', 'ring-green-500', 'bg-green-50');
-                    xenditMethods.style.display = 'none';
-                    midtransNote.classList.remove('hidden');
-                    
-                    // Clear all payment method selections for Midtrans
-                    document.querySelectorAll('input[name="payment_method"]').forEach(input => {
-                        input.checked = false;
-                        input.removeAttribute('required');
-                    });
-                }
-            });
+        // Update end date when start date changes
+        document.getElementById('scheduled_start_date').addEventListener('change', function() {
+            updateEndDate();
         });
 
-        // Accordion Toggle Function
+        function updateEndDate() {
+            const startDateInput = document.getElementById('scheduled_start_date');
+            const startDateDisplay = document.getElementById('start-date-display');
+            const endDateDisplay = document.getElementById('end-date-display');
+            
+            if (startDateInput.value) {
+                const startDate = new Date(startDateInput.value);
+                const endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + packageDurationDays);
+                
+                const startFormatted = startDate.toLocaleDateString('id-ID', { 
+                    day: 'numeric', 
+                    month: 'short', 
+                    year: 'numeric' 
+                });
+                const endFormatted = endDate.toLocaleDateString('id-ID', { 
+                    day: 'numeric', 
+                    month: 'short', 
+                    year: 'numeric' 
+                });
+                
+                startDateDisplay.textContent = startFormatted;
+                endDateDisplay.textContent = endFormatted;
+            }
+        }
+
+        // Initialize end date on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateEndDate();
+        });
+
+        // Accordion toggle function
         function toggleAccordion(section) {
             const content = document.getElementById(section + '-content');
             const icon = document.getElementById(section + '-icon');
             
             // Close all other accordions
-            ['bank-transfer', 'e-wallet', 'qris'].forEach(otherSection => {
+            ['bank-transfer', 'e-wallet'].forEach(otherSection => {
                 if (otherSection !== section) {
                     const otherContent = document.getElementById(otherSection + '-content');
                     const otherIcon = document.getElementById(otherSection + '-icon');
@@ -353,47 +373,58 @@
             }
         }
 
+        // Payment method selection with visual feedback
+        document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                // Remove selected state from all labels
+                document.querySelectorAll('input[name="payment_method"]').forEach(r => {
+                    const label = r.closest('label');
+                    label.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50');
+                    const circle = label.querySelector('div > div');
+                    if (circle) circle.classList.remove('opacity-100');
+                });
+                
+                // Add selected state to current label
+                if (this.checked) {
+                    const label = this.closest('label');
+                    label.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50');
+                    const circle = label.querySelector('div > div');
+                    if (circle) circle.classList.add('opacity-100');
+                }
+            });
+        });
+
+        // Form submission
         paymentForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
+            // Validation
             const emailInput = document.getElementById('email');
             if (!emailInput.value || !emailInput.checkValidity()) {
                 alert('Harap masukkan email yang valid.');
                 return;
             }
 
-            const paymentGateway = document.querySelector('input[name="payment_gateway"]:checked').value;
-            
-            // Check if payment method is selected for Xendit
-            if (paymentGateway === 'xendit') {
-                const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
-                if (!paymentMethod) {
-                    alert('Harap pilih metode pembayaran.');
-                    return;
-                }
-            }
-
-            payButton.disabled = true;
-            payButton.textContent = 'Memproses...';
-            
-            const formData = new FormData(paymentForm);
-                
-            // Validasi tanggal mulai
-            const startDateInput = document.getElementById('scheduled_start_date');
-            if (!startDateInput.value) {
-                alert('Harap pilih tanggal mulai.');
-                payButton.disabled = false;
-                payButton.textContent = 'Bayar Sekarang';
+            const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+            if (!paymentMethod) {
+                alert('Harap pilih metode pembayaran.');
                 return;
             }
 
-            try {
-                // Determine endpoint based on payment gateway
-                const endpoint = paymentGateway === 'xendit' 
-                    ? '{{ route("transaction.create-invoice") }}'
-                    : '{{ route("midtrans.create-invoice") }}';
+            const startDateInput = document.getElementById('scheduled_start_date');
+            if (!startDateInput.value) {
+                alert('Harap pilih tanggal mulai premium.');
+                return;
+            }
 
-                const response = await fetch(endpoint, {
+            // Show loading
+            loadingModal.classList.remove('hidden');
+            payButton.disabled = true;
+            
+            const formData = new FormData(paymentForm);
+
+            try {
+                const response = await fetch('{{ route("transaction.create-invoice") }}', {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -404,171 +435,21 @@
 
                 const result = await response.json();
 
-                if (paymentGateway === 'xendit') {
-                    if (result.invoice_url) {
-                        window.location.href = result.invoice_url;
-                    } else {
-                        alert(result.message + (result.error ? ': ' + result.error : ''));
-                    }
+                if (result.invoice_url) {
+                    window.location.href = result.invoice_url;
                 } else {
-                    // Midtrans handling
-                    if (result.status === 'success' && result.snap_token) {
-                        snap.pay(result.snap_token, {
-                            onSuccess: function(result) {
-                                window.location.href = '{{ route("transaction.success") }}';
-                            },
-                            onPending: function(result) {
-                                // Start status checking for pending payments
-                                showStatusCheckModal(result.order_id);
-                            },
-                            onError: function(result) {
-                                console.error('Payment error:', result);
-                                alert('Pembayaran gagal. Silakan coba lagi.');
-                            },
-                            onClose: function() {
-                                payButton.disabled = false;
-                                payButton.textContent = 'Bayar Sekarang';
-                            }
-                        });
-                    } else {
-                        alert(result.message || 'Terjadi kesalahan saat memproses pembayaran');
-                    }
+                    loadingModal.classList.add('hidden');
+                    alert(result.message + (result.error ? ': ' + result.error : ''));
                 }
+                
             } catch (error) {
+                loadingModal.classList.add('hidden');
                 alert('Terjadi kesalahan jaringan. Silakan coba lagi.');
                 console.error('Fetch error:', error);
             } finally {
-                if (paymentGateway === 'xendit') {
-                    payButton.disabled = false;
-                    payButton.textContent = 'Bayar Sekarang';
-                }
+                payButton.disabled = false;
             }
         });
-
-        // Add visual feedback when payment method is selected
-        document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                // Remove selected state from all labels
-                document.querySelectorAll('input[name="payment_method"]').forEach(r => {
-                    r.closest('label').classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50');
-                });
-                
-                // Add selected state to current label
-                if (this.checked) {
-                    this.closest('label').classList.add('ring-2', 'ring-blue-500', 'bg-blue-50');
-                }
-            });
-        });
-
-        // Auto-open accordion when a payment method is selected
-        document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                if (this.checked) {
-                    // Determine which section this radio belongs to
-                    let section = '';
-                    if (['MANDIRI', 'BCA', 'BNI', 'BRI'].includes(this.value)) {
-                        section = 'bank-transfer';
-                    } else if (['OVO', 'DANA', 'GOPAY', 'SHOPEEPAY'].includes(this.value)) {
-                        section = 'e-wallet';
-                    } else if (this.value === 'QRIS') {
-                        section = 'qris';
-                    }
-                    
-                    // Make sure the correct accordion is open
-                    if (section) {
-                        const content = document.getElementById(section + '-content');
-                        const icon = document.getElementById(section + '-icon');
-                        if (content.classList.contains('hidden')) {
-                            toggleAccordion(section);
-                        }
-                    }
-                }
-            });
-        });
-
-        // Status checking functions
-        let statusCheckInterval;
-        let currentOrderId;
-
-        function showStatusCheckModal(orderId) {
-            currentOrderId = orderId;
-            document.getElementById('modalOrderId').textContent = orderId;
-            document.getElementById('statusCheckModal').classList.remove('hidden');
-            
-            // Start auto checking every 10 seconds
-            statusCheckInterval = setInterval(checkPaymentStatus, 10000);
-            
-            // Check immediately
-            setTimeout(checkPaymentStatus, 2000);
-        }
-
-        function closeStatusModal() {
-            document.getElementById('statusCheckModal').classList.add('hidden');
-            if (statusCheckInterval) {
-                clearInterval(statusCheckInterval);
-            }
-            
-            // Reset checkout form
-            payButton.disabled = false;
-            payButton.textContent = 'Bayar Sekarang';
-        }
-
-        async function checkPaymentStatus() {
-            if (!currentOrderId) return;
-
-            try {
-                console.log('Checking payment status for order:', currentOrderId);
-                
-                const response = await fetch('{{ route("midtrans.check-status") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({ order_id: currentOrderId })
-                });
-
-                const result = await response.json();
-                console.log('Payment status response:', result);
-
-                if (result.status === 'paid' || result.status === 'settlement') {
-                    console.log('Payment confirmed as successful!');
-                    clearInterval(statusCheckInterval);
-                    closeStatusModal();
-                    window.location.href = '{{ route("transaction.success") }}';
-                } else if (result.status === 'failed' || result.status === 'expired') {
-                    console.log('Payment failed or expired');
-                    clearInterval(statusCheckInterval);
-                    closeStatusModal();
-                    alert('Pembayaran gagal atau expired. Silakan coba lagi.');
-                    window.location.href = '{{ route("transaction.failed") }}';
-                } else {
-                    console.log('Payment still pending, status:', result.status);
-                    // Update UI to show current status
-                    updateStatusDisplay(result.status, result.message);
-                }
-                // If still pending, continue checking
-            } catch (error) {
-                console.error('Error checking payment status:', error);
-                // Update UI to show error
-                updateStatusDisplay('error', 'Error checking status: ' + error.message);
-            }
-        }
-
-        function updateStatusDisplay(status, message) {
-            const statusText = document.querySelector('#statusCheckModal .text-gray-500');
-            if (statusText) {
-                statusText.innerHTML = `
-                    <div class="flex items-center justify-center space-x-2">
-                        <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
-                        <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                        <div class="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-                        <span class="ml-2">Status: ${status} - ${message}</span>
-                    </div>
-                `;
-            }
-        }
     </script>
-
 </body>
 </html>

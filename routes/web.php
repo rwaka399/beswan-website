@@ -7,7 +7,6 @@ use App\Http\Controllers\LessonPackageController;
 use App\Http\Controllers\Master\RoleController;
 use App\Http\Controllers\Master\UserController;
 use App\Http\Controllers\Master\MenuController;
-use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TeacherAttendanceController;
 use App\Http\Controllers\TransactionController;
@@ -129,19 +128,12 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('/transaction')->group(function () {
         Route::get('/checkout/{lessonPackageId}', [TransactionController::class, 'showCheckout'])->name('transaction.checkout');
         Route::post('/create-invoice', [TransactionController::class, 'createInvoice'])->name('transaction.create-invoice');
+        Route::post('/check-status', [TransactionController::class, 'checkPaymentStatus'])->name('transaction.check-status');
         Route::get('/success', [TransactionController::class, 'success'])->name('transaction.success');
         Route::get('/failed', [TransactionController::class, 'failed'])->name('transaction.failed');
-    });
-
-    // Midtrans routes
-    Route::prefix('/midtrans')->group(function () {
-        Route::post('/create-invoice', [MidtransController::class, 'createInvoiceMidtrans'])->name('midtrans.create-invoice');
-        Route::get('/payment-redirect', [MidtransController::class, 'paymentRedirect'])->name('midtrans.payment-redirect');
-        Route::post('/check-status', [MidtransController::class, 'checkPaymentStatus'])->name('midtrans.check-status');
     });
 });
 
 // Webhooks (no auth required)
 Route::post('/xendit/webhook', [TransactionController::class, 'handleWebhook'])->name('xendit.webhook');
-Route::post('/midtrans/webhook', [MidtransController::class, 'handleNotification'])->name('midtrans.webhook');
 

@@ -162,11 +162,27 @@
                                                             <li>
                                                                 @php
                                                                     $routeName = \App\Helpers\IconHelper::getRouteFromLink($child->menu_link);
+                                                                    $isExternalUrl = filter_var($child->menu_link, FILTER_VALIDATE_URL);
+                                                                    $hasValidRoute = $routeName && $routeName !== '#' && \Illuminate\Support\Facades\Route::has($routeName);
                                                                 @endphp
-                                                                @if($routeName && $routeName !== '#' && \Illuminate\Support\Facades\Route::has($routeName))
+                                                                @if($hasValidRoute || $isExternalUrl)
                                                                     <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                                                        href="{{ route($routeName) }}">
+                                                                        href="{{ $isExternalUrl ? $child->menu_link : route($routeName) }}"
+                                                                        @if($isExternalUrl) target="_blank" @endif>
                                                                         {{ $child->menu_name }}
+                                                                        @if($isExternalUrl)
+                                                                            <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                                            </svg>
+                                                                        @endif
+                                                                    </a>
+                                                                @elseif($child->menu_link && !empty($child->menu_link))
+                                                                    <!-- Child menu dengan link tapi route belum ada -->
+                                                                    <a class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+                                                                        href="{{ $child->menu_link }}"
+                                                                        title="This page may not be available yet">
+                                                                        {{ $child->menu_name }}
+                                                                        <small class="text-xs ml-2 text-orange-500">(Beta)</small>
                                                                     </a>
                                                                 @else
                                                                     <span class="flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-400 rounded-lg cursor-not-allowed">
@@ -196,16 +212,37 @@
                                                     </form>                                                @else
                                                     @php
                                                         $routeName = \App\Helpers\IconHelper::getRouteFromLink($menu->menu_link);
+                                                        $isExternalUrl = filter_var($menu->menu_link, FILTER_VALIDATE_URL);
+                                                        $hasValidRoute = $routeName && $routeName !== '#' && \Illuminate\Support\Facades\Route::has($routeName);
                                                     @endphp
-                                                    @if($routeName && $routeName !== '#' && \Illuminate\Support\Facades\Route::has($routeName))
+                                                    @if($hasValidRoute || $isExternalUrl)
                                                         <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                                            href="{{ route($routeName) }}">
+                                                            href="{{ $isExternalUrl ? $menu->menu_link : route($routeName) }}"
+                                                            @if($isExternalUrl) target="_blank" @endif>
                                                             <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
                                                                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                                 {!! \App\Helpers\IconHelper::getFontAwesomeToSvg($menu->menu_icon) !!}
                                                             </svg>
                                                             {{ $menu->menu_name }}
+                                                            @if($isExternalUrl)
+                                                                <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                                </svg>
+                                                            @endif
+                                                        </a>
+                                                    @elseif($menu->menu_link && !empty($menu->menu_link))
+                                                        <!-- Menu dengan link tapi route belum ada - bisa diklik tapi menuju 404 -->
+                                                        <a class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+                                                            href="{{ $menu->menu_link }}"
+                                                            title="This page may not be available yet">
+                                                            <svg class="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24"
+                                                                height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                {!! \App\Helpers\IconHelper::getFontAwesomeToSvg($menu->menu_icon) !!}
+                                                            </svg>
+                                                            {{ $menu->menu_name }}
+                                                            <small class="text-xs ml-2 text-orange-500">(Beta)</small>
                                                         </a>
                                                     @else
                                                         <span class="w-full flex items-center gap-x-3.5 py-2 px-2.5 text-sm text-gray-400 rounded-lg cursor-not-allowed">

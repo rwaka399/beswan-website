@@ -95,12 +95,26 @@
                         <label for="menu_icon" class="block text-sm font-semibold text-gray-700">Menu Icon</label>
                         <input type="text" name="menu_icon" id="menu_icon" value="{{ old('menu_icon', $menu->menu_icon) }}"
                             class="mt-2 block w-full rounded-xl border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent py-2 px-3 text-gray-800"
-                            placeholder="e.g., fas fa-home, bi bi-house">
-                        <p class="text-xs text-gray-500 mt-1">Use Font Awesome or Bootstrap Icons classes</p>
+                            placeholder="e.g., fas fa-home, fas fa-users, fas fa-cog">
+                        <div class="mt-2">
+                            <p class="text-xs text-gray-500">Use FontAwesome classes. Available icons:</p>
+                            <div class="mt-1 text-xs text-gray-400 space-x-2">
+                                <span class="inline-block">fas fa-home</span>
+                                <span class="inline-block">fas fa-users</span>
+                                <span class="inline-block">fas fa-bars</span>
+                                <span class="inline-block">fas fa-cog</span>
+                                <span class="inline-block">fas fa-list</span>
+                                <span class="inline-block">fas fa-user</span>
+                                <span class="inline-block">fas fa-graduation-cap</span>
+                                <span class="inline-block">fas fa-money-bill-wave</span>
+                            </div>
+                        </div>
                         @if($menu->menu_icon)
                             <div class="mt-2 flex items-center">
                                 <span class="text-sm text-gray-600">Preview: </span>
-                                <i class="{{ $menu->menu_icon }} ml-2 text-blue-600"></i>
+                                <svg class="w-4 h-4 ml-2 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    {!! \App\Helpers\IconHelper::getFontAwesomeToSvg($menu->menu_icon) !!}
+                                </svg>
                             </div>
                         @endif
                         @error('menu_icon')

@@ -25,15 +25,11 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('payment_method')->nullable();
             $table->timestamp('expires_at')->nullable();
+            $table->date('scheduled_start_date')->nullable();
+            $table->text('schedule_notes')->nullable();
 
-            $table->string('midtrans_transaction_id')->nullable();
-            $table->string('midtrans_order_id')->nullable();
-            $table->string('midtrans_payment_code')->nullable();
-            $table->string('midtrans_transaction_status')->nullable();
-            $table->text('midtrans_response')->nullable();
-
-            // milih opsi atau xendit sebagai payment gateway
             $table->string('payment_gateway')->default('xendit');
+
             
             $table->timestamps();
 

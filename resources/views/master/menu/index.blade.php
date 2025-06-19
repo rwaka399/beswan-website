@@ -125,8 +125,12 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     @if ($menu->menu_icon)
-                                        <i class="{{ $menu->menu_icon }} text-gray-600"></i>
-                                        <span class="ml-2 text-gray-500">{{ $menu->menu_icon }}</span>
+                                        <div class="flex items-center">
+                                            <svg class="w-4 h-4 text-gray-600 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                {!! \App\Helpers\IconHelper::getFontAwesomeToSvg($menu->menu_icon) !!}
+                                            </svg>
+                                            <span class="text-gray-500 text-xs">{{ $menu->menu_icon }}</span>
+                                        </div>
                                     @else
                                         <span class="text-gray-400">No icon</span>
                                     @endif
@@ -208,7 +212,9 @@
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center">
                                         @if ($parentMenu->menu_icon)
-                                            <i class="{{ $parentMenu->menu_icon }} text-blue-600 mr-3"></i>
+                                            <svg class="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                {!! \App\Helpers\IconHelper::getFontAwesomeToSvg($parentMenu->menu_icon) !!}
+                                            </svg>
                                         @endif
                                         <div>
                                             <h4 class="font-medium text-gray-900">{{ $parentMenu->menu_name }}</h4>

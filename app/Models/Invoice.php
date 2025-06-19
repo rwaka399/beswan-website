@@ -20,17 +20,15 @@ class Invoice extends Model
         'description',
         'payment_method',
         'expires_at',
-        'midtrans_transaction_id',
-        'midtrans_order_id',
-        'midtrans_payment_code',
-        'midtrans_transaction_status',
-        'midtrans_response',
         'payment_gateway',
+        'scheduled_start_date',
+        'schedule_notes',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'expires_at' => 'datetime',
+        'scheduled_start_date' => 'date',
     ];
     public function user()
     {

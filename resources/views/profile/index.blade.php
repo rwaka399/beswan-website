@@ -104,29 +104,127 @@
                     <h3 class="text-lg font-bold text-gray-800">Status Premium</h3>
                 </div>
 
-                @if(auth()->user()->isPremium())
+                @php
+                    $userPackages = auth()->user()->userLessonPackages()
+                        ->whereIn('status', ['active', 'scheduled'])
+                        ->where('end_date', '>', now())
+                        ->orderBy('end_date', 'desc')
+                        ->get();
+                    
+                    $activePackage = $userPackages->where('status', 'active')->first();
+                    $scheduledPackages = $userPackages->where('status', 'scheduled');
+                @endphp
+
+                @if($activePackage)
                     @php
-                        $remainingDays = auth()->user()->getRemainingPremiumDays();
-                        $expiryDate = auth()->user()->getPremiumExpiryDate();
+                        $remainingDays = now()->diffInDays($activePackage->end_date, false);
+                        $expiryDate = $activePackage->end_date;
                     @endphp
                     
-                    <div class="bg-white rounded-xl p-4 border border-gray-200">
-                        <div class="flex items-center justify-between">
+                    <div class="bg-white rounded-xl p-4 border border-gray-200 mb-4">
+                        <div class="flex items-center justify-between mb-3">
                             <div class="flex items-center">
                                 <span class="inline-flex items-center px-3 py-1 bg-gradient-to-r from-yellow-500 to-amber-500 text-white text-sm font-medium rounded-full">
-                                    ⭐ Premium
+                                    ⭐ Premium Aktif
                                 </span>
                             </div>
                             <div class="text-right">
                                 <div class="text-lg font-bold text-gray-800">{{ $remainingDays }} hari tersisa</div>
-                                <div class="text-sm text-gray-500">Berakhir: {{ $expiryDate ? $expiryDate->format('d M Y') : '-' }}</div>
+                                <div class="text-sm text-gray-500">Berakhir: {{ $expiryDate->format('d M Y') }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-4 text-center text-sm border-t pt-3">
+                            <div>
+                                <p class="text-gray-500">Paket</p>
+                                <p class="font-semibold text-gray-800">{{ $activePackage->lessonPackage->lesson_package_name }}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500">Dimulai</p>
+                                <p class="font-semibold text-gray-800">{{ $activePackage->start_date->format('d M Y') }}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500">Durasi</p>
+                                <p class="font-semibold text-gray-800">{{ $activePackage->lessonPackage->formatted_duration }}</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-4 text-center">
+                    @if($scheduledPackages->count() > 0)
+                        <div class="bg-blue-50 rounded-xl p-4 border border-blue-200 mb-4">
+                            <div class="flex items-center mb-3">
+                                <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span class="font-medium text-blue-800">Perpanjangan Premium Terjadwal</span>
+                            </div>
+                            
+                            @foreach($scheduledPackages as $scheduled)
+                                <div class="bg-white rounded-lg p-3 mb-2 last:mb-0">
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-medium text-gray-800">{{ $scheduled->lessonPackage->lesson_package_name }}</p>
+                                            <p class="text-sm text-gray-600">Mulai: {{ $scheduled->scheduled_start_date->format('d M Y') }}</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-sm text-blue-600 font-medium">{{ $scheduled->lessonPackage->formatted_duration }}</p>
+                                            <p class="text-xs text-gray-500">{{ $scheduled->scheduled_start_date->diffInDays(now()) }} hari lagi</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    <div class="text-center">
                         <a href="{{ route('home') }}#paket" class="inline-block bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
                             Perpanjang Premium
+                        </a>
+                    </div>
+                @elseif($scheduledPackages->count() > 0)
+                    <div class="bg-blue-50 rounded-xl p-4 border border-blue-200 mb-4">
+                        <div class="flex items-center justify-center mb-3">
+                            <span class="inline-flex items-center px-3 py-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-medium rounded-full">
+                                📅 Premium Terjadwal
+                            </span>
+                        </div>
+                        
+                        @foreach($scheduledPackages as $scheduled)
+                            <div class="bg-white rounded-lg p-4 mb-3 last:mb-0">
+                                <div class="text-center">
+                                    <h4 class="font-semibold text-gray-800 mb-2">{{ $scheduled->lessonPackage->lesson_package_name }}</h4>
+                                    <div class="grid grid-cols-3 gap-4 text-sm">
+                                        <div>
+                                            <p class="text-gray-500">Mulai Premium</p>
+                                            <p class="font-semibold text-blue-600">{{ $scheduled->scheduled_start_date->format('d M Y') }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-500">Durasi</p>
+                                            <p class="font-semibold text-gray-800">{{ $scheduled->lessonPackage->formatted_duration }}</p>
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-500">Berakhir</p>
+                                            <p class="font-semibold text-orange-600">{{ $scheduled->end_date->format('d M Y') }}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    @if($scheduled->scheduled_start_date->isToday())
+                                        <div class="mt-3 p-2 bg-green-100 border border-green-200 rounded-lg">
+                                            <p class="text-green-800 text-sm font-medium">🎉 Premium akan aktif hari ini!</p>
+                                        </div>
+                                    @else
+                                        <div class="mt-3 p-2 bg-blue-100 border border-blue-200 rounded-lg">
+                                            <p class="text-blue-800 text-sm">Menunggu {{ $scheduled->scheduled_start_date->diffInDays(now()) }} hari lagi</p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="text-center">
+                        <a href="{{ route('home') }}#paket" class="inline-block bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
+                            Beli Paket Lainnya
                         </a>
                     </div>
                 @else

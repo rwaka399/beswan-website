@@ -17,6 +17,9 @@ class Kernel extends ConsoleKernel
         
         // Update expired lesson packages daily at midnight
         $schedule->command('packages:update-expired')->daily();
+        
+        // Activate scheduled packages daily at midnight
+        $schedule->command('packages:activate-scheduled')->daily();
     }
 
     /**

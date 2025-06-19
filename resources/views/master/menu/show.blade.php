@@ -29,7 +29,9 @@
             <div class="text-center">
                 <div class="flex justify-center items-center mb-4">
                     @if($menu->menu_icon)
-                        <i class="{{ $menu->menu_icon }} text-4xl text-blue-600 mr-3"></i>
+                        <svg class="w-12 h-12 text-blue-600 mr-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            {!! \App\Helpers\IconHelper::getFontAwesomeToSvg($menu->menu_icon) !!}
+                        </svg>
                     @endif
                     <svg class="h-12 w-12 text-blue-600" xmlns="http://www.w3.org/2000/svg" width="24"
                         height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -91,7 +93,9 @@
                         <label class="block text-sm font-medium text-gray-600">Menu Icon</label>
                         @if($menu->menu_icon)
                             <div class="mt-1 flex items-center space-x-3">
-                                <i class="{{ $menu->menu_icon }} text-2xl text-blue-600"></i>
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    {!! \App\Helpers\IconHelper::getFontAwesomeToSvg($menu->menu_icon) !!}
+                                </svg>
                                 <p class="text-sm text-gray-900 bg-gray-50 rounded-lg px-3 py-2 font-mono">{{ $menu->menu_icon }}</p>
                             </div>
                         @else
@@ -117,7 +121,9 @@
                             @if($parent)
                                 <div class="mt-1 flex items-center space-x-2">
                                     @if($parent->menu_icon)
-                                        <i class="{{ $parent->menu_icon }} text-sm text-gray-600"></i>
+                                        <svg class="w-4 h-4 text-gray-600 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            {!! \App\Helpers\IconHelper::getFontAwesomeToSvg($parent->menu_icon) !!}
+                                        </svg>
                                     @endif
                                     <p class="text-sm text-gray-900 bg-gray-50 rounded-lg px-3 py-2">{{ $parent->menu_name }}</p>
                                 </div>
@@ -172,7 +178,9 @@
                             <div class="flex items-center justify-between bg-white rounded-lg p-3 shadow-sm">
                                 <div class="flex items-center space-x-3">
                                     @if($subMenu->menu_icon)
-                                        <i class="{{ $subMenu->menu_icon }} text-blue-600"></i>
+                                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            {!! \App\Helpers\IconHelper::getFontAwesomeToSvg($subMenu->menu_icon) !!}
+                                        </svg>
                                     @endif
                                     <div>
                                         <p class="text-sm font-medium text-gray-900">{{ $subMenu->menu_name }}</p>

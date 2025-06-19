@@ -78,7 +78,6 @@ class TransactionController extends Controller
             'payment_method' => 'required|in:' . implode(',', $allowedPaymentMethods),
             'scheduled_start_date' => 'required|date|after_or_equal:today',
             'schedule_notes' => 'nullable|string|max:255',
-            'payment_gateway' => 'required|in:xendit,midtrans',
         ]);
 
         try {
@@ -114,7 +113,6 @@ class TransactionController extends Controller
                 'failure_redirect_url' => url('/transaction/failed'),
                 'currency' => 'IDR',
                 'payment_methods' => [$request->payment_method],
-                'payment_gateway' => $request->payment_gateway,
             ];
 
             Log::info('Params prepared for invoice: ' . json_encode($params));
@@ -137,9 +135,11 @@ class TransactionController extends Controller
                 'description' => $params['description'],
                 'status' => $result->getStatus(),
                 'payment_method' => $request->payment_method,
-                'payment_gateway' => $request->payment_gateway,
+                'payment_gateway' => 'xendit',
                 'invoice_url' => $result->getInvoiceUrl(),
                 'expires_at' => Carbon::parse($result->getExpiryDate()),
+                'scheduled_start_date' => Carbon::parse($request->scheduled_start_date),
+                'schedule_notes' => $request->schedule_notes,
             ];
 
             Log::info('Saving invoice data: ' . json_encode($invoiceData));
@@ -261,18 +261,23 @@ class TransactionController extends Controller
                     $existingUserPackage = UserLessonPackage::where('invoice_id', $invoice->invoice_id)->first();
                     
                     if (!$existingUserPackage) {
-                        // Tentukan tanggal mulai premium
+                        // Gunakan scheduled_start_date dari invoice yang dipilih user saat checkout
+                        $scheduledStartDate = Carbon::parse($invoice->scheduled_start_date);
                         $now = Carbon::now();
 
-                        // Jika user masih punya premium aktif, perpanjang dari end_date terakhir
-                        $lastActive = $user->userLessonPackages()
-                            ->where('status', 'active')
-                            ->where('end_date', '>', $now)
-                            ->orderByDesc('end_date')
-                            ->first();
+                        // Hitung end date berdasarkan durasi paket dari scheduled start date
+                        $endDate = $package->getEndDate($scheduledStartDate);
 
-                        $startDate = $lastActive ? Carbon::parse($lastActive->end_date) : $now;
-                        $endDate = $package->getEndDate($startDate);
+                        // Tentukan status dan start_date berdasarkan kondisi:
+                        // 1. Jika scheduled date hari ini atau masa lalu, langsung aktif
+                        // 2. Jika scheduled date di masa depan, status 'scheduled'
+                        if ($scheduledStartDate->isToday() || $scheduledStartDate->isPast()) {
+                            $status = 'active';
+                            $startDate = $now; // Mulai sekarang jika sudah waktunya
+                        } else {
+                            $status = 'scheduled';
+                            $startDate = $scheduledStartDate; // Akan dimulai sesuai jadwal
+                        }
 
                         // Buat record baru di user_lesson_packages
                         UserLessonPackage::create([
@@ -280,13 +285,14 @@ class TransactionController extends Controller
                             'lesson_package_id' => $package->lesson_package_id,
                             'invoice_id' => $invoice->invoice_id,
                             'purchased_at' => $paidAt,
-                            'scheduled_start_date' => $startDate,
+                            'scheduled_start_date' => $scheduledStartDate,
                             'start_date' => $startDate,
                             'end_date' => $endDate,
-                            'status' => 'active',
+                            'status' => $status,
+                            'schedule_notes' => $invoice->schedule_notes,
                         ]);
 
-                        Log::info("User premium status activated for user ID: {$user->user_id}, package ID: {$package->lesson_package_id}");
+                        Log::info("User premium status created for user ID: {$user->user_id}, package ID: {$package->lesson_package_id}, scheduled: {$scheduledStartDate}, start: {$startDate}, end: {$endDate}, status: {$status}");
                     }
                 }
             }

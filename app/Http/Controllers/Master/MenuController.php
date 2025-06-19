@@ -52,7 +52,7 @@ class MenuController extends Controller
 
         DB::beginTransaction();
         try {
-            Menu::create([
+            $menu = Menu::create([
                 'menu_name' => $request->menu_name,
                 'menu_type' => $request->menu_type,
                 'menu_icon' => $request->menu_icon,
@@ -63,8 +63,23 @@ class MenuController extends Controller
                 'created_by' => Auth::user()->user_id,
             ]);
 
+            // Auto-assign menu baru ke role Admin (role_id = 1)
+            $adminRole = \App\Models\Role::where('role_name', 'Admin')->first();
+            if ($adminRole) {
+                \App\Models\RoleMenu::create([
+                    'role_id' => $adminRole->role_id,
+                    'menu_id' => $menu->menu_id,
+                    'created_by' => Auth::user()->user_id,
+                    'updated_by' => Auth::user()->user_id,
+                ]);
+            }
+
             DB::commit();
-            return redirect()->route('menu-index')->with('success', 'Menu created successfully.');
+            
+            // Refresh menu session untuk semua user yang login
+            $this->refreshMenuSession();
+            
+            return redirect()->route('menu-index')->with('success', 'Menu created successfully and assigned to Admin role.');
         } catch (\Exception $e) {
             DB::rollback();
             return redirect()->back()->with('error', 'Failed to create menu: ' . $e->getMessage());
@@ -124,6 +139,10 @@ class MenuController extends Controller
             ]);
 
             DB::commit();
+            
+            // Refresh menu session untuk semua user yang login
+            $this->refreshMenuSession();
+            
             return redirect()->route('menu-index')->with('success', 'Menu updated successfully.');
         } catch (\Exception $e) {
             DB::rollback();
@@ -149,6 +168,10 @@ class MenuController extends Controller
             $menu->delete();
 
             DB::commit();
+            
+            // Refresh menu session untuk semua user yang login
+            $this->refreshMenuSession();
+            
             return redirect()->route('menu-index')->with('success', 'Menu deleted successfully.');
         } catch (\Exception $e) {
             DB::rollback();
@@ -216,5 +239,16 @@ class MenuController extends Controller
         }
 
         return $stats;
+    }
+
+    /**
+     * Refresh menu session untuk user yang sedang login
+     */
+    private function refreshMenuSession()
+    {
+        $guard = Auth::guard('web');
+        if ($guard instanceof \App\Guards\CustomSessionGuard) {
+            $guard->refreshUserMenus();
+        }
     }
 }

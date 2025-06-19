@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Menu;
@@ -293,6 +294,14 @@ class CustomSessionGuard implements Guard
     {
         $permissions = $this->getUserPermissions();
         return isset($permissions[$menuSlug]) && in_array($permission, $permissions[$menuSlug]);
+    }
+
+    public function refreshUserMenus()
+    {
+        $user = $this->user();
+        if ($user) {
+            $this->claimUserData($user);
+        }
     }
 
     public function hasUser()
