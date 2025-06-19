@@ -37,9 +37,7 @@
                 Checkout Paket Premium
             </h1>
             <p class="text-gray-600">{{ $package->lesson_package_name }}</p>
-        </div>
-
-        <!-- Package Info Card -->
+        </div>        <!-- Package Info Card -->
         <div class="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-2xl p-6 mb-8 fade-in">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>

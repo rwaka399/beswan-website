@@ -9,11 +9,8 @@ use App\Models\Transaction;
 use App\Models\Invoice;
 use App\Models\UserLessonPackage;
 use Carbon\Carbon;
-// use App\Models\LogKeuangan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-// use Illuminate\Support\Facades\Mail;
-// use App\Mail\InvoiceNotification;
 use Illuminate\Support\Str;
 use Xendit\Configuration;
 use Xendit\Invoice\InvoiceApi;
@@ -30,31 +27,31 @@ class TransactionController extends Controller
     private function initializeXendit()
     {
         $apiKey = config('services.xendit.secret_key');
+        $isProduction = config('services.xendit.is_production', false);
 
         if (!$apiKey) {
             throw new \Exception('Xendit API key is not configured. Please set XENDIT_SECRET_KEY in your .env file.');
         }
 
+        // Log environment info for debugging
+        $environment = $isProduction ? 'PRODUCTION' : 'TESTING';
+        $keyType = str_contains($apiKey, '_development_') ? 'Development' : 'Production';
+
+        Log::info("Xendit initialized - Environment: {$environment}, Key Type: {$keyType}");
+
         Configuration::setXenditKey($apiKey);
         return new InvoiceApi();
     }
 
-    // public function listPackages()
-    // {
-    //     return view('dashboard', [
-    //         'lesson_packages' => LessonPackage::all(),
-    //     ]);
-    // }
-
     public function showCheckout($lessonPackageId)
     {
         $package = LessonPackage::findOrFail($lessonPackageId);
-        
+
         // Menghitung tanggal minimal (hari ini) dan maksimal (3 bulan dari sekarang)
         // untuk datepicker
         $minDate = Carbon::today()->format('Y-m-d');
         $maxDate = Carbon::today()->addMonths(3)->format('Y-m-d');
-        
+
         return view('transaction.checkout', compact('package', 'minDate', 'maxDate'));
     }
 
@@ -179,9 +176,11 @@ class TransactionController extends Controller
         try {
             Log::info('Xendit Webhook received: ' . json_encode($request->all(), JSON_PRETTY_PRINT));
 
-            // Verifikasi Signature jika disetting (skip untuk testing di development)
+            // Verifikasi signature hanya jika di mode production Xendit
             $xenditWebhookSecret = config('services.xendit.webhook_secret');
-            if ($xenditWebhookSecret && app()->environment('production')) {
+            $isXenditProduction = config('services.xendit.is_production', false);
+
+            if ($xenditWebhookSecret && $isXenditProduction) {
                 $signature = $request->header('x-xendit-signature');
                 $expectedSignature = hash_hmac('sha256', $request->getContent(), $xenditWebhookSecret);
 
@@ -193,7 +192,7 @@ class TransactionController extends Controller
                     return response()->json(['message' => 'Invalid webhook signature'], 403);
                 }
             } else {
-                Log::info('Webhook signature verification skipped (development mode)');
+                Log::info('Webhook signature verification skipped (Xendit testing mode)');
             }
 
             $data = $request->all();
@@ -257,29 +256,16 @@ class TransactionController extends Controller
                 $package = $invoice->lessonPackage;
 
                 if ($user && $package) {
-                    // Cek apakah sudah ada record untuk invoice ini
                     $existingUserPackage = UserLessonPackage::where('invoice_id', $invoice->invoice_id)->first();
-                    
+
                     if (!$existingUserPackage) {
-                        // Gunakan scheduled_start_date dari invoice yang dipilih user saat checkout
                         $scheduledStartDate = Carbon::parse($invoice->scheduled_start_date);
                         $now = Carbon::now();
-
-                        // Hitung end date berdasarkan durasi paket dari scheduled start date
                         $endDate = $package->getEndDate($scheduledStartDate);
 
-                        // Tentukan status dan start_date berdasarkan kondisi:
-                        // 1. Jika scheduled date hari ini atau masa lalu, langsung aktif
-                        // 2. Jika scheduled date di masa depan, status 'scheduled'
-                        if ($scheduledStartDate->isToday() || $scheduledStartDate->isPast()) {
-                            $status = 'active';
-                            $startDate = $now; // Mulai sekarang jika sudah waktunya
-                        } else {
-                            $status = 'scheduled';
-                            $startDate = $scheduledStartDate; // Akan dimulai sesuai jadwal
-                        }
+                        $status = $scheduledStartDate->isToday() || $scheduledStartDate->isPast() ? 'active' : 'scheduled';
+                        $startDate = $status === 'active' ? $now : $scheduledStartDate;
 
-                        // Buat record baru di user_lesson_packages
                         UserLessonPackage::create([
                             'user_id' => $user->user_id,
                             'lesson_package_id' => $package->lesson_package_id,
@@ -314,7 +300,41 @@ class TransactionController extends Controller
         }
     }
 
+    public function webhookLogs()
+    {
+        // Hanya allow di development atau dengan key khusus
+        if (!app()->environment('local') && !request()->has('debug')) {
+            abort(404);
+        }
 
+        // Baca log xendit webhook untuk debugging
+        $logPath = storage_path('logs/laravel.log');
+        $logs = [];
+
+        if (file_exists($logPath)) {
+            $content = file_get_contents($logPath);
+            $lines = explode("\n", $content);
+
+            // Filter hanya log yang berkaitan dengan xendit webhook
+            foreach (array_reverse($lines) as $line) {
+                if (
+                    strpos($line, 'Xendit Webhook') !== false ||
+                    strpos($line, 'TEST -') !== false ||
+                    strpos($line, 'Invoice created') !== false ||
+                    strpos($line, 'External ID generated') !== false
+                ) {
+                    $logs[] = $line;
+                    if (count($logs) >= 50) break; // Limit 50 lines
+                }
+            }
+        }
+
+        return response()->json([
+            'logs' => $logs,
+            'total' => count($logs),
+            'message' => count($logs) > 0 ? 'Logs found' : 'No logs found'
+        ]);
+    }
 
     public function success(Request $request)
     {

@@ -137,3 +137,9 @@ Route::middleware(['auth'])->group(function () {
 // Webhooks (no auth required)
 Route::post('/xendit/webhook', [TransactionController::class, 'handleWebhook'])->name('xendit.webhook');
 
+// Debug routes (only accessible in development or with debug key)
+Route::get('/xendit-test/logs', [TransactionController::class, 'webhookLogs'])->name('xendit.logs');
+
+// Legacy webhook route untuk compatibility
+Route::post('/transaction/webhook', [TransactionController::class, 'handleWebhook']);
+
